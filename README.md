@@ -23,6 +23,7 @@ NEBIUS_API_KEY=your_private_token_factory_key
 NEBIUS_MODEL=nvidia/nemotron-3-super-120b-a12b
 STUDIO_INFERENCE_ENABLED=1
 STUDIO_MAX_RUNS=30
+STUDIO_MAX_TOTAL_TOKENS=0
 STUDIO_DATA=./data
 PORT=4328
 ```
@@ -30,6 +31,8 @@ PORT=4328
 Set `STUDIO_INFERENCE_ENABLED=1` **only after verifying a free-credit balance in Nebius**. Studio does not enable billing, purchase compute or recharge credits. This flag is operator confirmation, not a provider billing safeguard. Keep automatic recharge disabled at the provider. No account balance is inferred from tokens. The workspace cap counts persisted runs, with at most 12 calls and 2,048 output tokens per call, and at most two active runs. Existing data counts against the cap after restarting.
 
 Restart after changing backend configuration. Never paste credentials into the UI, issue trackers, screenshots or reports. `.env`, private data, runtime history and temporary caches are excluded from Git. Store the checkout, npm cache and data on D: or E: on Windows, for example `npm ci --cache D:/PROJECTS/Nebius-NVIDIA-BenchClaw-2026/.cache/npm --ignore-scripts`.
+
+`STUDIO_MAX_TOTAL_TOKENS=0` disables provider calls by default. After confirming free credits and provider billing conditions, the operator must choose a positive cumulative token limit. Studio durably reserves UTF-8 prompt bytes plus a 4,096-token allowance plus maximum output before each request, then reconciles with the provider's reported usage. This is a conservative application admission estimate, not an exact model tokenizer or a monetary cap. A response exceeding its reservation blocks further calls; it cannot undo that response's consumption. Missing usage, a transport failure or an interrupted reservation after restart blocks subsequent inference until an operator reconciles the ledger against actual provider usage. Do not delete `data/token-ledger.json` to evade the limit. A cancelled request may still consume provider tokens.
 
 ## Main journey
 

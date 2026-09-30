@@ -3,6 +3,8 @@ import {readFile,mkdir,writeFile,rename,readdir} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
 import {randomBytes,createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
+import {existsSync,readFileSync,writeFileSync,renameSync} from 'node:fs';
+import {TokenBudget} from './token-budget.mjs';
 import {VaultManager,MemoryStorage} from '../vendor/enigmagent/vault-core.js';
 import {OperationBroker} from '../vendor/enigmagent/operation-broker.js';
 import {NebiusClient} from './nebius.mjs';
@@ -20,8 +22,11 @@ await vault.addSecret({name:'synthetic_service',domain:'127.0.0.1',value:protect
 const service=http.createServer((req,res)=>{res.writeHead(req.url==='/health'&&req.headers.authorization===`Bearer ${protectedSecret}`?200:401,{'Content-Type':'text/plain'});res.end('Synthetic service fixture; response body is discarded by EnigmAgent.');});
 await new Promise(r=>service.listen(0,'127.0.0.1',r));
 const broker=new OperationBroker({vault,allowLoopback:true,operations:[{name:'synthetic_health',url:`http://127.0.0.1:${service.address().port}/health`,secret:'synthetic_service'}]});
-const client=new NebiusClient(async()=>suppliedKey?await vault.resolve('nebius_api','https://api.tokenfactory.nebius.com'):null);
-const enabled=process.env.STUDIO_INFERENCE_ENABLED==='1'&&!!suppliedKey;
+const ledgerFile=join(DATA,'token-ledger.json');
+const ledger=existsSync(ledgerFile)?JSON.parse(readFileSync(ledgerFile,'utf8')):undefined;
+const budget=new TokenBudget(Number(process.env.STUDIO_MAX_TOTAL_TOKENS||0),ledger,state=>{writeFileSync(ledgerFile+'.tmp',JSON.stringify(state),{mode:0o600});renameSync(ledgerFile+'.tmp',ledgerFile);});
+const client=new NebiusClient(async()=>suppliedKey?await vault.resolve('nebius_api','https://api.tokenfactory.nebius.com'):null,undefined,undefined,budget);
+const enabled=process.env.STUDIO_INFERENCE_ENABLED==='1'&&!!suppliedKey&&budget.limit>0;
 const runs=new Map(),controllers=new Map();let inflight=0;const inflightOwners=new Set();
 for(const f of await readdir(DATA))if(/^[a-f0-9-]{36}\.json$/.test(f)){
  try{const r=JSON.parse(await readFile(join(DATA,f),'utf8'));if(['running','queued'].includes(r.status)){r.status='error';r.error='server_restarted';}runs.set(r.id,r);}catch{}
@@ -49,7 +54,7 @@ const server=http.createServer(async(req,res)=>{
   if(!token){token=randomBytes(32).toString('hex');res.setHeader('Set-Cookie',`studio=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2592000`);}
   const owner=tokenHash(token);
   if(req.method==='POST'&&req.headers.origin!==`http://${req.headers.host}`)return send(403,{error:'origin_not_allowed'});
-  if(req.method==='GET'&&url.pathname==='/api/catalog')return send(200,{tasks:TASKS,profiles:PROFILES,toolLabels:TOOL_LABELS,provider:{name:'Nebius Token Factory',model:client.model,configured:!!suppliedKey,enabled,creditBalance:null},limits:{maxRuns,usedRuns:runs.size,steps:12,timeoutSeconds:180},enigmagent:{version:'3.0.0',vaultFormat:2,health:'real synthetic local service; no external credentials'}});
+  if(req.method==='GET'&&url.pathname==='/api/catalog')return send(200,{tasks:TASKS,profiles:PROFILES,toolLabels:TOOL_LABELS,provider:{name:'Nebius Token Factory',model:client.model,configured:!!suppliedKey,enabled:enabled&&!budget.snapshot().blocked,creditBalance:null},limits:{maxRuns,usedRuns:runs.size,steps:12,timeoutSeconds:180,tokenBudget:budget.snapshot()},enigmagent:{version:'3.0.0',vaultFormat:2,health:'real synthetic local service; no external credentials'}});
   if(req.method==='GET'&&url.pathname==='/api/runs')return send(200,[...runs.values()].filter(r=>r.owner===owner).sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).map(publicRun));
   if(req.method==='GET'&&url.pathname==='/api/compare'){
    const a=runs.get(url.searchParams.get('a')),b=runs.get(url.searchParams.get('b'));if(!a||!b||a.owner!==owner||b.owner!==owner)return send(404,{error:'not_found'});
@@ -65,6 +70,7 @@ const server=http.createServer(async(req,res)=>{
   }
   if(req.method==='POST'&&url.pathname==='/api/runs'){
    if(!enabled)return send(503,{error:suppliedKey?'inference_disabled':'credentials_missing',message:'An operator must configure Nebius and confirm free credits. No mock run is substituted.'});
+   if(budget.snapshot().blocked)return send(503,{error:'token_accounting_unknown'});
    if(runs.size+inflight>=maxRuns)return send(429,{error:'run_budget_exhausted'});
    if(controllers.size+inflight>=2||inflightOwners.has(owner)||[...runs.values()].some(r=>r.owner===owner&&['running','queued'].includes(r.status)))return send(429,{error:'run_already_active'});
    // Reserve the slot synchronously: the checks above must also count requests whose body is still being read.

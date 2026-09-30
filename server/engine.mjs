@@ -44,7 +44,7 @@ export async function executeRun(run,client,{signal,persist=async()=>{},health}=
   }
   if(!finished)throw new Error('step_limit');
   run.result=validate(task,run.files,run.events);run.status=run.result.passed?'passed':'failed';
- }catch(e){run.error=['cancelled','run_timeout','step_limit','credentials_missing','authentication_failed','rate_limited','provider_timeout','incomplete_response','invalid_response','response_too_large','provider_error','network_error'].includes(e.code||e.message)?(e.code||e.message):'execution_error';if(timeout.signal.aborted&&!signal?.aborted)run.error='run_timeout';run.status=signal?.aborted?'cancelled':'error';run.result=null;event({type:'error',title:run.status==='cancelled'?'Run cancelled':'Execution stopped',detail:run.error});}
+ }catch(e){run.error=['cancelled','run_timeout','step_limit','credentials_missing','authentication_failed','rate_limited','provider_timeout','incomplete_response','invalid_response','response_too_large','provider_error','network_error','token_budget_exhausted','token_accounting_unknown','token_budget_overrun'].includes(e.code||e.message)?(e.code||e.message):'execution_error';if(timeout.signal.aborted&&!signal?.aborted)run.error='run_timeout';run.status=signal?.aborted?'cancelled':'error';run.result=null;event({type:'error',title:run.status==='cancelled'?'Run cancelled':'Execution stopped',detail:run.error});}
  finally{clearTimeout(timer);run.durationMs=Math.round(performance.now()-started);const totals=run.calls.map(c=>c.usage?.total_tokens);run.tokens=totals.length&&totals.every(Number.isFinite)?totals.reduce((a,b)=>a+b,0):null;await persist(run);}
  return run;
 }

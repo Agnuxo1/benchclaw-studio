@@ -36,7 +36,7 @@ The existing contract requires six principal-task runs with at least five passin
 - Release prose checks verify exact citations and concept coverage, but contradictory prose can still pass; semantic review remains necessary.
 - Shipping acceptance cases are withheld from tool feedback, but the software is public: they are not secret from a person reading source.
 - Clean dependency installation is pending the required nominal package approval.
-- No public judging route, provider balance check or cumulative token admission cap yet. The operator flag is not a billing guarantee.
+- No public judging route or provider balance check yet. A durable cumulative token admission guard now exists and defaults to zero; its conservative reservation estimate and operator flag are not billing guarantees.
 - Loopback sessions and virtual file capabilities do not constitute public account authentication or a general OS sandbox.
 
 Review evidence: local coordination reports and experiment outputs are retained in the dedicated workspace. They must be sanitized and deliberately selected before publication.
