@@ -1,0 +1,11 @@
+node_modules/
+.cache/
+.env
+.env.*
+!.env.example
+data/
+private/
+.cognition/
+artifacts/
+clean-install/
+*.log

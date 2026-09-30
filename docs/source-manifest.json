@@ -1,0 +1,26 @@
+{
+  "baseline": "2b4d3fff45463b74430563c89a38a58dbe3e153c",
+  "date": "2026-09-30",
+  "files": [
+    {
+      "path": "vendor/enigmagent/gateway-policy.js",
+      "sha256": "35b02882fe521fc6699bc21cc2c5f7df64192eb3d29939aaa990b2a44e999e24",
+      "same_as_local_upstream": true
+    },
+    {
+      "path": "vendor/enigmagent/LICENSE",
+      "sha256": "3e678775bdc901ec198d173d64cffd4d5998a5491fd67899ce3067e93c842ab5",
+      "same_as_local_upstream": true
+    },
+    {
+      "path": "vendor/enigmagent/operation-broker.js",
+      "sha256": "ba7d722aa5774ad6eba910f9eb603d60e59d7f381bc9fc620436d5b905c7aab2",
+      "same_as_local_upstream": true
+    },
+    {
+      "path": "vendor/enigmagent/vault-core.js",
+      "sha256": "4683fa379cbab89f01878994fa376dde2259e167ddd4cde114438dbc149ede2d",
+      "same_as_local_upstream": true
+    }
+  ]
+}
