@@ -57,7 +57,21 @@ The registry with one row per experiment is [`experiments.csv`](experiments.csv)
 
 **Stopping rule.** Separate token ledger, with a cap of 3,000,000.
 
-**Results.** _Pending. Filled in only from `experiments/E02/summary.json`._
+**Results (2026-10-28, 54/54 cells: 30 from E02 plus 24 from E02b; `experiments/E02/summary-combined.json`).** Pass rates are means over the three seeds ± sample SD.
+
+| Tier / policy | Pass rate | Mean run time | Mean tokens | Mean cost (USD) |
+| --- | --- | --- | --- | --- |
+| Nemotron 3.5 Lightning | 0.667 ± 0.167 | 46.6 s | 16,256 | 0.00284 |
+| Nemotron 3 Super (control) | 0.667 ± 0.167 | 19.4 s | 6,759 | 0.00374 |
+| Nemotron 3 Ultra | 0.778 ± 0.096 | 7.2 s | 3,557 | 0.00612 |
+| **Ladder** (Lightning → Super → Ultra) | **0.889 ± 0.096** | 55.1 s | — | **0.00413** |
+
+- **H4: accepted.** Lightning went from 0.056 to 0.667, and its `incomplete_response` share fell from 17/18 to 1/18. Its remaining failures were 2 `step_limit`, 1 `run_timeout`, 1 empty answer (`finish_reason=stop` with no content) and 2 failed checks.
+- **H5: accepted.** Ladder 0.889 ≥ always-Ultra 0.778 − 0.05, and ladder cost $0.00413 < $0.00612, which is 33% less. The ladder resolved 16 of 18 cells: 12 on Lightning, 3 on Super and 1 on Ultra.
+- **H6: accepted.** Super 0.667 vs 0.667 in E01, and Ultra 0.778 vs 0.667.
+- **Product rule applied.** The default `max_tokens` is now 8,192 (`DEFAULT_MAX_TOKENS` in `server/engine.mjs`).
+- **Trade-off made explicit.** At 8,192 tokens, Lightning is the cheapest per task, yet it is the slowest tier. It used 4.6× Ultra's tokens, most of them reasoning. The ladder therefore saves money at the cost of latency (55 s against 7 s for Ultra). For latency-critical tasks, starting at Ultra is the better policy. Studio exposes both options.
+- **Spend.** E02 plus E02b cost about $0.23 in total, based on provider-reported usage.
 
 ### E02 stopping event and E02b completion (written 2026-10-28, before any E02b call)
 

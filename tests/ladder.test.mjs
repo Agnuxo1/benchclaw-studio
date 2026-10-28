@@ -49,6 +49,6 @@ test('Run output budget reaches every provider call and is bounded',async()=>{
  const {makeRun,executeRun}=await import('../server/engine.mjs');
  const run=makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id,{maxTokens:8192});await executeRun(run,client);
  assert.equal(run.inference.maxTokens,8192);assert.deepEqual(seen,[8192]);
- assert.equal(makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id,{maxTokens:1e9}).inference.maxTokens,2048);
- assert.equal(makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id).inference.maxTokens,2048);
+ assert.equal(makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id,{maxTokens:1e9}).inference.maxTokens,8192);
+ assert.equal(makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id).inference.maxTokens,8192);
 });
