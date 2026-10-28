@@ -1,0 +1,698 @@
+{
+  "generatedAt": "2026-10-28T15:22:32.365Z",
+  "sources": [
+    "experiments/E01/runs"
+  ],
+  "maxTokens": 2048,
+  "notExecuted": 0,
+  "tiers": [
+    "lightning",
+    "super",
+    "ultra"
+  ],
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "profiles": [
+    "careful",
+    "lean"
+  ],
+  "tasks": [
+    "invoice-cleanup",
+    "release-brief",
+    "shipping-function"
+  ],
+  "byTier": {
+    "lightning": {
+      "model": "nvidia/Nemotron-3_5-Lightning",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.05555555555555555,
+        "sd": 0.09622504486493763
+      },
+      "durationMs": {
+        "mean": 17878.222222222223,
+        "sd": 9013.856604633162
+      },
+      "tokens": {
+        "mean": 4091.5555555555557
+      },
+      "costUSD": {
+        "mean": 0.0007701033333333334,
+        "known": true,
+        "low": 0.0007701033333333334,
+        "high": 0.0007701033333333334
+      },
+      "throughputTokS": 216.83430386447856,
+      "errors": [
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response"
+      ]
+    },
+    "super": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "durationMs": {
+        "mean": 14048.444444444445,
+        "sd": 10737.019244717683
+      },
+      "tokens": {
+        "mean": 5104.888888888889
+      },
+      "costUSD": {
+        "mean": 0.0027226,
+        "known": true,
+        "low": 0.0027226,
+        "high": 0.0027226
+      },
+      "throughputTokS": 115.10791366906476,
+      "errors": [
+        "step_limit"
+      ]
+    },
+    "ultra": {
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "durationMs": {
+        "mean": 6122.5,
+        "sd": 5309.557445277891
+      },
+      "tokens": {
+        "mean": 4335.222222222223
+      },
+      "costUSD": {
+        "mean": 0.007799777777777779,
+        "known": true,
+        "low": 0.007799777777777779,
+        "high": 0.007799777777777779
+      },
+      "throughputTokS": 179.88668555240795,
+      "errors": [
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response"
+      ]
+    }
+  },
+  "policies": {
+    "ladder": {
+      "passRate": {
+        "mean": 0.8333333333333334,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.005126792222222221,
+      "costKnownCells": 18,
+      "costUSDLow": 0.005126792222222221,
+      "costUSDHigh": 0.005126792222222221,
+      "durationMs": 32663.722222222223,
+      "durationMsMedian": 30113,
+      "durationMsMax": 75223,
+      "cells": 18
+    },
+    "always_ultra": {
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.007799777777777779,
+      "costKnownCells": 18,
+      "costUSDLow": 0.007799777777777779,
+      "costUSDHigh": 0.007799777777777779,
+      "durationMs": 6122.5,
+      "durationMsMedian": 4218.5,
+      "durationMsMax": 25140,
+      "cells": 18
+    },
+    "always_super": {
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.0027226,
+      "costKnownCells": 18,
+      "costUSDLow": 0.0027226,
+      "costUSDHigh": 0.0027226,
+      "durationMs": 14048.444444444445,
+      "durationMsMedian": 10501,
+      "durationMsMax": 54316,
+      "cells": 18
+    },
+    "speculative": {
+      "passRate": {
+        "mean": 0.8333333333333334,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.005238925555555555,
+      "costKnownCells": 18,
+      "costUSDLow": 0.005238925555555555,
+      "costUSDHigh": 0.005238925555555555,
+      "durationMs": 17379.5,
+      "durationMsMedian": 14612,
+      "durationMsMax": 60213,
+      "cells": 18
+    },
+    "tier_memory": {
+      "passRate": {
+        "mean": 0.8333333333333334,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.0045805755555555555,
+      "costKnownCells": 18,
+      "costUSDLow": 0.0045805755555555555,
+      "costUSDHigh": 0.0045805755555555555,
+      "durationMs": 22873.5,
+      "durationMsMedian": 21021,
+      "durationMsMax": 60213,
+      "cells": 18
+    },
+    "ladder_on_memory_cells": {
+      "passRate": {
+        "mean": 0.8333333333333334,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.005126792222222221,
+      "costKnownCells": 18,
+      "costUSDLow": 0.005126792222222221,
+      "costUSDHigh": 0.005126792222222221,
+      "durationMs": 32663.722222222223,
+      "durationMsMedian": 30113,
+      "durationMsMax": 75223,
+      "cells": 18
+    },
+    "always_ultra_on_memory_cells": {
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.007799777777777779,
+      "costKnownCells": 18,
+      "costUSDLow": 0.007799777777777779,
+      "costUSDHigh": 0.007799777777777779,
+      "durationMs": 6122.5,
+      "durationMsMedian": 4218.5,
+      "durationMsMax": 25140,
+      "cells": 18
+    }
+  },
+  "cells": [
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 10265
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "lightning",
+        "path": [
+          "lightning"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 19606
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 11897
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ],
+      "speculative": {
+        "chosenTier": null,
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ],
+        "durationMs": 20759
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": null,
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 16370
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 10649
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 22,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 15464
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 22,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 7833
+      },
+      "memory": {
+        "startTier": "super",
+        "chosenTier": "super",
+        "path": [
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 22,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ],
+      "speculative": {
+        "chosenTier": "ultra",
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ],
+        "durationMs": 14757
+      },
+      "memory": {
+        "startTier": "super",
+        "chosenTier": "ultra",
+        "path": [
+          "super",
+          "ultra"
+        ]
+      }
+    },
+    {
+      "seed": 22,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ],
+      "speculative": {
+        "chosenTier": null,
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ],
+        "durationMs": 14467
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": null,
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ]
+      }
+    },
+    {
+      "seed": 22,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 19183
+      },
+      "memory": {
+        "startTier": "super",
+        "chosenTier": "super",
+        "path": [
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 22,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ],
+      "speculative": {
+        "chosenTier": null,
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ],
+        "durationMs": 60213
+      },
+      "memory": {
+        "startTier": "super",
+        "chosenTier": null,
+        "path": [
+          "super",
+          "ultra"
+        ]
+      }
+    },
+    {
+      "seed": 33,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 8255
+      },
+      "memory": {
+        "startTier": "super",
+        "chosenTier": "super",
+        "path": [
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 33,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 8628
+      },
+      "memory": {
+        "startTier": "super",
+        "chosenTier": "super",
+        "path": [
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 33,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ],
+      "speculative": {
+        "chosenTier": "ultra",
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ],
+        "durationMs": 17375
+      },
+      "memory": {
+        "startTier": "ultra",
+        "chosenTier": "ultra",
+        "path": [
+          "ultra"
+        ]
+      }
+    },
+    {
+      "seed": 33,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ],
+      "speculative": {
+        "chosenTier": "ultra",
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ],
+        "durationMs": 35569
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "ultra",
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ]
+      }
+    },
+    {
+      "seed": 33,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 11949
+      },
+      "memory": {
+        "startTier": "super",
+        "chosenTier": "super",
+        "path": [
+          "super"
+        ]
+      }
+    },
+    {
+      "seed": 33,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 9592
+      },
+      "memory": {
+        "startTier": "super",
+        "chosenTier": "super",
+        "path": [
+          "super"
+        ]
+      }
+    }
+  ]
+}

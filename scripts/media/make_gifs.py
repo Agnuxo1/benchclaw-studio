@@ -76,7 +76,7 @@ def tier_bars(summary, out):
     by = summary["byTier"]; tiers = [t for t in TIERS if t[0] in by]
     metrics = [("Tasks passed", lambda b: 100 * (b["passRate"]["mean"] or 0), lambda b: 100 * (b["passRate"]["sd"] or 0), "{:.0f}%"),
                ("Mean run time (s)", lambda b: (b["durationMs"]["mean"] or 0) / 1000, lambda b: (b["durationMs"]["sd"] or 0) / 1000, "{:.1f}s"),
-               ("Cost per run (US$)", lambda b: b["costUSD"]["mean"] or 0, lambda b: 0, "${:.4f}")]
+               ("Cost per run (US$)", lambda b: b["costUSD"].get("high", b["costUSD"]["mean"]) or 0, lambda b: 0, "${:.4f}")]
     fig, axes = plt.subplots(1, 3, figsize=(11, 4.4), dpi=100, facecolor=BG)
     fig.subplots_adjust(bottom=0.16, wspace=0.28)
     frames = 24
@@ -103,6 +103,16 @@ def tier_bars(summary, out):
     plt.close(fig)
 
 
+def cost_range(p):
+    """Cost per task as (low, high): cells with an unknown cost are bounded (E02 erratum); older summaries carry only the mean."""
+    lo, hi = p.get("costUSDLow"), p.get("costUSDHigh")
+    return (lo, hi) if lo is not None and hi is not None else (p["costUSD"] or 0, p["costUSD"] or 0)
+
+
+def hi_differs(lo, hi):
+    return round(lo, 4) != round(hi, 4)
+
+
 def policy_bars(summary, out):
     pol = summary.get("policies") or {}
     if "ladder" not in pol:
@@ -111,21 +121,54 @@ def policy_bars(summary, out):
     fig, ax = plt.subplots(figsize=(10, 3.6), dpi=100, facecolor=BG)
     fig.subplots_adjust(left=0.17, right=0.98)
     frames = 26
-    maxc = max((r[1]["costUSD"] or 0) for r in rows) * 1.35 or 1
+    maxc = max(cost_range(r[1])[1] for r in rows) * 1.35 or 1
 
     def draw(i):
         f = 1 - (1 - min(1, (i + 1) / (frames - 6))) ** 3
         ax.clear(); ax.set_facecolor(BG)
         for s in ax.spines.values(): s.set_visible(False)
         for k, (name, p) in enumerate(rows):
-            c = p["costUSD"] or 0
+            lo, c = cost_range(p)
             ax.barh(k, c * f, color=[MUTED, "#4f7f12", GREEN][k], height=0.55)
-            ax.text(c * f + maxc * 0.01, k, f"${c * f:.4f} per task · {100 * p['passRate']['mean']:.0f}% passed", va="center", fontsize=10.5, color=INK)
+            price = f"${lo * f:.4f}–{c * f:.4f}" if hi_differs(lo, c) else f"${c * f:.4f}"
+            ax.text(c * f + maxc * 0.01, k, f"{price} per task · {100 * p['passRate']['mean']:.0f}% passed", va="center", fontsize=10.5, color=INK)
         ax.set_yticks(range(3)); ax.set_yticklabels([r[0] for r in rows], fontsize=11); ax.set_xticks([]); ax.set_xlim(0, maxc * 1.6)
         ax.set_title("Routing policy on the same recorded grid: cost per task and success", fontsize=12, color=INK, loc="left")
 
     anim = FuncAnimation(fig, draw, frames=frames, interval=80)
     anim.save(out / "policy.gif", writer=PillowWriter(fps=12))
+    plt.close(fig)
+
+
+def experiments_bars(rows, out):
+    """Ladder against always-Ultra in every complete experiment: pass rate, and cost per task with its bounds."""
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.9), dpi=100, facecolor=BG)
+    fig.subplots_adjust(left=0.07, right=0.98, wspace=0.28, bottom=0.2, top=0.8)
+    frames = 26; x = list(range(len(rows))); w = 0.36
+    maxc = max(max(cost_range(r[1])[1], cost_range(r[2])[1]) for r in rows) * 1.3
+
+    def draw(i):
+        f = 1 - (1 - min(1, (i + 1) / (frames - 6))) ** 3
+        for ax in axes:
+            ax.clear(); ax.set_facecolor(BG)
+            for s in ax.spines.values(): s.set_visible(False)
+            ax.set_xticks(x); ax.set_xticklabels([r[0] for r in rows], fontsize=10, color=INK); ax.set_yticks([])
+        for k, (name, lad, ult) in enumerate(rows):
+            for j, (p, col) in enumerate(((lad, GREEN), (ult, MUTED))):
+                v = p["passRate"]["mean"] * f
+                axes[0].bar(k + (j - 0.5) * w, v, w * 0.92, color=col)
+                axes[0].text(k + (j - 0.5) * w, v + 0.02, f"{100 * v:.0f}%", ha="center", fontsize=9.5, color=INK)
+                lo, hi = cost_range(p)
+                axes[1].bar(k + (j - 0.5) * w, hi * f, w * 0.92, color=col)
+                label = f"${lo * f:.4f}–\n${hi * f:.4f}" if hi_differs(lo, hi) else f"${hi * f:.4f}"
+                axes[1].text(k + (j - 0.5) * w, hi * f + maxc * 0.02, label, ha="center", fontsize=8.5, color=INK)
+        axes[0].set_ylim(0, 1.15); axes[1].set_ylim(0, maxc)
+        axes[0].set_title("Tasks passed", fontsize=11, color=INK, loc="left"); axes[1].set_title("Cost per task (US$)", fontsize=11, color=INK, loc="left")
+        fig.suptitle("Auto-tier ladder (green) vs always Nemotron 3 Ultra (grey), every complete pre-registered experiment", fontsize=11.5, color=INK, x=0.07, ha="left")
+
+    fig.text(0.07, 0.04, "The ladder passed more tasks every time; its cost did not hold up. E02 cost corrected for one cell with unknown usage (erratum in experiments/LOG.md).", fontsize=9, color=MUTED)
+    anim = FuncAnimation(fig, draw, frames=frames, interval=80)
+    anim.save(out / "experiments.gif", writer=PillowWriter(fps=12))
     plt.close(fig)
 
 
@@ -159,9 +202,16 @@ def budget_bars(base, alt, out):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--summary"); ap.add_argument("--compare"); ap.add_argument("--out", default="docs/media")
     ap.add_argument("--no-architecture", action="store_true"); ap.add_argument("--label")
+    ap.add_argument("--experiments", help="name=summary.json;... for the ladder-vs-Ultra chart across experiments")
     a = ap.parse_args(); out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     if not a.no_architecture:
         architecture(out)
+    if a.experiments:
+        rows = []
+        for item in a.experiments.split(";"):
+            name, path = item.split("=", 1); pol = json.loads(Path(path).read_text(encoding="utf8"))["policies"]
+            rows.append((name, pol["ladder"], pol["always_ultra"]))
+        experiments_bars(rows, out)
     if a.summary:
         s = json.loads(Path(a.summary).read_text(encoding="utf8")); s["label"] = a.label or s.get("label", "E01")
         tier_bars(s, out); policy_bars(s, out)

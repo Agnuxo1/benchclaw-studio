@@ -23,7 +23,7 @@ export function summarize(results,{tiers,seeds,profiles,tasks,...meta}){
   // Runs stopped by the ledger before reaching the model are missing data, not failures (E03 rule: judge on complete cells only).
   const rs=results.filter(r=>r.tier===tier&&!NOT_EXECUTED.has(r.error));const perSeed=seeds.map(s=>rs.filter(r=>r.inference.seed===s)).filter(g=>g.length);
   summary.byTier[tier]={model:MODELS[tier].id,runs:rs.length,passRate:{mean:mean(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length)),sd:sd(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length))},
-   durationMs:{mean:mean(rs.map(r=>r.durationMs)),sd:sd(rs.map(r=>r.durationMs))},tokens:{mean:mean(rs.filter(r=>r.tokens!==null).map(r=>r.tokens))},costUSD:{mean:mean(rs.filter(r=>r.cost!==null).map(r=>r.cost)),known:rs.every(r=>r.cost!==null)},throughputTokS:throughput(rs),errors:rs.filter(r=>r.status==='error').map(r=>r.error)};
+   durationMs:{mean:mean(rs.map(r=>r.durationMs)),sd:sd(rs.map(r=>r.durationMs))},tokens:{mean:mean(rs.filter(r=>r.tokens!==null).map(r=>r.tokens))},costUSD:{mean:mean(rs.filter(r=>r.cost!==null).map(r=>r.cost)),known:rs.every(r=>r.cost!==null),low:mean(rs.map(r=>costBounds(r)[0])),high:mean(rs.map(r=>costBounds(r)[1]))},throughputTokS:throughput(rs),errors:rs.filter(r=>r.status==='error').map(r=>r.error)};
  }
  if(LADDER.every(t=>tiers.includes(t))){
   // Tier memory (E03 H8): seeds are taken in ascending order as time; a task and profile start at the tier that resolved their latest earlier seed, else at Lightning.
