@@ -23,3 +23,21 @@ The registry with one row per experiment is [`experiments.csv`](experiments.csv)
 **Stopping rule.** Hard token reservation cap of 3,000,000 (application ledger). Any `token_*` error stops the experiment, and runs completed so far are reported as partial.
 
 **Results.** _Pending. Filled in only from `experiments/E01/summary.json`._
+
+## E02 — Output-token budget for reasoning tiers (pre-registered 2026-10-28, while E01 was running and before any E02 call)
+
+**Observation that motivated it.** In the first E01 runs, every Nemotron 3.5 Lightning run stopped with `incomplete_response`: the provider returned `finish_reason=length` after 2,048 completion tokens, most of them reasoning tokens (the smoke test showed 306 of 320 completion tokens were reasoning on a trivial prompt). E01 is not modified; its Lightning failures are reported as measured.
+
+**Question.** Is the Lightning failure in E01 caused by the output budget rather than by capability?
+
+**Change.** One variable only: `max_tokens` per call goes from 2,048 to 8,192. Everything else is identical to E01: the same 3 tasks × 2 profiles × seeds 11, 22, 33 × 3 tiers (54 runs), temperature 0, 12 turns, 180 s per run, the same checks and the same prices.
+
+**Hypotheses and decision rules.**
+- **H4 (budget).** The Lightning pass rate in E02 is greater than in E01, and Lightning's share of `incomplete_response` errors falls to ≤ 1/18.
+- **H5 (ladder at 8,192).** Same rule as H1, evaluated on E02.
+- **H6 (no regression).** The Super and Ultra pass rates in E02 are ≥ their E01 rates − 0.05.
+- **Product rule.** The Studio default `max_tokens` becomes 8,192 only if H4 and H6 both hold. Otherwise it stays at 2,048 and Lightning is documented as unsuitable at that setting.
+
+**Stopping rule.** Separate token ledger, with a cap of 3,000,000.
+
+**Results.** _Pending. Filled in only from `experiments/E02/summary.json`._

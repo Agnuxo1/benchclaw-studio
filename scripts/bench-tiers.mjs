@@ -18,7 +18,7 @@ import {evaluatePolicy} from '../server/ladder.mjs';
 const arg=(name,fallback)=>{const i=process.argv.indexOf('--'+name);return i>0?process.argv[i+1]:fallback;};
 const out=arg('out','experiments/E01'),tiers=arg('tiers',LADDER.join(',')).split(','),seeds=arg('seeds','11,22,33').split(',').map(Number);
 const profiles=arg('profiles',Object.keys(PROFILES).join(',')).split(','),tasks=arg('tasks',TASKS.map(t=>t.id).join(',')).split(',');
-const cap=Number(arg('token-cap','3000000')),concurrency=Number(arg('concurrency','3')),hypothesis=arg('hypothesis','H1');
+const cap=Number(arg('token-cap','3000000')),concurrency=Number(arg('concurrency','3')),hypothesis=arg('hypothesis','H1'),maxTokens=Number(arg('max-tokens','2048'));
 if(tiers.some(t=>!MODELS[t])||seeds.some(s=>!Number.isSafeInteger(s)))throw new Error('Invalid tiers or seeds');
 const key=process.env.NEBIUS_API_KEY;delete process.env.NEBIUS_API_KEY;
 if(!key)throw new Error('NEBIUS_API_KEY is required; this benchmark never substitutes simulated runs.');
@@ -41,7 +41,7 @@ const results=[];let next=0;
 async function worker(){
  while(next<jobs.length){
   const {seed,task,profile,tier}=jobs[next++];
-  const run=makeRun(task,profile,TASKS.find(t=>t.id===task).tools,'bench',MODELS[tier].id,{seed});
+  const run=makeRun(task,profile,TASKS.find(t=>t.id===task).tools,'bench',MODELS[tier].id,{seed,maxTokens});
   await executeRun(run,client,{health:()=>broker.execute('synthetic_health')});
   const s=JSON.stringify(run).split(key).join('[REDACTED]');await writeFile(join(out,'runs',run.id+'.json'),s);
   results.push(JSON.parse(s));
@@ -55,7 +55,7 @@ service.close();
 // Aggregates: mean and sample standard deviation across seeds, plus offline ladder policy evaluation.
 const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
 const sd=a=>a.length>1?Math.sqrt(a.reduce((s,x)=>s+(x-mean(a))**2,0)/(a.length-1)):null;
-const summary={generatedAt:new Date().toISOString(),commit,tiers,seeds,profiles,tasks,tokenLedger:budget.snapshot(),byTier:{},policies:{}};
+const summary={generatedAt:new Date().toISOString(),commit,tiers,seeds,profiles,tasks,maxTokens,tokenLedger:budget.snapshot(),byTier:{},policies:{}};
 for(const tier of tiers){
  const rs=results.filter(r=>r.tier===tier);const perSeed=seeds.map(s=>rs.filter(r=>r.inference.seed===s));
  summary.byTier[tier]={model:MODELS[tier].id,runs:rs.length,passRate:{mean:mean(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length)),sd:sd(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length))},
