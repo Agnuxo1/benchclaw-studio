@@ -14,7 +14,7 @@ import {NebiusClient} from '../server/nebius.mjs';
 import {TokenBudget} from '../server/token-budget.mjs';
 import {TASKS} from '../server/tasks.mjs';
 import {makeRun,executeRun,PROFILES} from '../server/engine.mjs';
-import {MODELS,LADDER} from '../server/models.mjs';
+import {MODELS,LADDER,tierOf,callCost} from '../server/models.mjs';
 import {summarize,mergeRuns,NOT_EXECUTED,summarizeLadders} from './summarize.mjs';
 import {makeLadder,executeSpeculativeLadder} from '../server/ladder.mjs';
 const arg=(name,fallback)=>{const i=process.argv.indexOf('--'+name);return i>0?process.argv[i+1]:fallback;};
@@ -24,9 +24,12 @@ const cap=Number(arg('token-cap','3000000')),concurrency=Number(arg('concurrency
 if(tiers.some(t=>!MODELS[t])||seeds.some(s=>!Number.isSafeInteger(s)))throw new Error('Invalid tiers or seeds');
 // --usd-cap: monetary stop from provider-reported usage × published prices. A job (or a live cell of up to 3 runs) starts only if
 // the spend so far plus a worst-case reserve per run still fits; a run with unknown cost counts as the reserve.
-const usdCap=Number(arg('usd-cap','Infinity')),RUN_RESERVE_USD=0.035;let spentUSD=0,inflightRuns=0,capStops=0;
+// Spend is counted per call: the provider-reported cost, or for a call that reached the provider without reported usage (an aborted or
+// failed request) a worst case of 40,000 prompt tokens plus the full output budget. Runs stopped by the ledger before a call cost nothing.
+const usdCap=Number(arg('usd-cap','Infinity')),RUN_RESERVE_USD=0.035;let spentUSD=Number(arg('spent-usd','0')),inflightRuns=0,capStops=0;
 const admit=n=>{if(spentUSD+(inflightRuns+n)*RUN_RESERVE_USD<=usdCap){inflightRuns+=n;return true;}capStops++;return false;};
-const charge=(n,costs)=>{inflightRuns-=n;for(const c of costs)spentUSD+=Number.isFinite(c)?c:RUN_RESERVE_USD;};
+const unknownCallUSD=model=>{const p=MODELS[tierOf(model)]?.price;return p?(40000*p.input+maxTokens*p.output)/1e6:RUN_RESERVE_USD;};
+const charge=(n,runs)=>{inflightRuns-=n;for(const r of runs)for(const c of r.calls){const x=callCost(c.model,c.usage);spentUSD+=Number.isFinite(x)?x:unknownCallUSD(c.model);}};
 const key=process.env.NEBIUS_API_KEY;delete process.env.NEBIUS_API_KEY;
 if(!key)throw new Error('NEBIUS_API_KEY is required; this benchmark never substitutes simulated runs.');
 await mkdir(join(out,'runs'),{recursive:true});
@@ -61,7 +64,7 @@ if(policy){
   if(!c.ladder){
    const ladder=makeLadder(c.task,c.profile,allowed,'bench',{seed:c.seed,policy});const runs=[];
    await executeSpeculativeLadder(ladder,client,{register:r=>runs.push(r),persistLadder:async l=>writeFile(join(out,'ladders',l.id+'.json'),JSON.stringify(l,null,2)),health:()=>broker.execute('synthetic_health')});
-   for(const r of runs)await save(r);done.push(ladder);charge(3,runs.map(r=>r.cost));
+   for(const r of runs)await save(r);done.push(ladder);charge(3,runs);
    await appendFile(lcsv,[ladder.id,ladder.createdAt,hypothesis,policy,c.task,c.profile,c.seed,ladder.status,ladder.chosenTier??'',ladder.decisionMs,ladder.durationMs,ladder.cost??'',ladder.steps.map(st=>`${st.tier}:${st.status}:${st.error??''}:${st.durationMs}`).join(' '),commit].join(',')+'\n');
    console.log(`${c.task.padEnd(16)} ${c.profile.padEnd(8)} seed=${c.seed} ${ladder.status.padEnd(10)} ${String(ladder.chosenTier).padEnd(9)} answer=${(ladder.decisionMs/1000).toFixed(1)}s settled=${(ladder.durationMs/1000).toFixed(1)}s ${ladder.steps.map(st=>st.tier[0]+':'+(st.error||st.status)).join(' ')}`);
   }else{
@@ -70,7 +73,7 @@ if(policy){
    await Promise.all(LADDER.slice(0,2).filter(t=>!grid[t]).map(rerun));
    if(!LADDER.slice(0,2).some(t=>grid[t].status==='passed')&&!grid.ultra)await rerun('ultra');
    const composed={...c.ladder,id:c.ladder.id,composedFrom:prior,steps:LADDER.filter(t=>grid[t]).map(t=>({tier:t,runId:grid[t].id,status:grid[t].status,error:grid[t].error,cost:grid[t].cost,tokens:grid[t].tokens,durationMs:grid[t].durationMs}))};
-   await writeFile(join(out,'ladders',composed.id+'.json'),JSON.stringify(composed,null,2));done.push(composed);charge(3,composed.steps.filter(st=>!c.ladder.steps.some(o=>o.runId===st.runId)).map(st=>st.cost));
+   await writeFile(join(out,'ladders',composed.id+'.json'),JSON.stringify(composed,null,2));done.push(composed);charge(3,LADDER.map(t=>grid[t]).filter(r=>r&&!c.ladder.steps.some(o=>o.runId===r.id)));
    console.log(`${c.task.padEnd(16)} ${c.profile.padEnd(8)} seed=${c.seed} composed  ${composed.steps.map(st=>st.tier[0]+':'+(st.error||st.status)).join(' ')}`);
   }
  }
@@ -80,9 +83,10 @@ if(policy){
 }
 const csv=join(out,'results.csv');
 if(!existsSync(csv))await writeFile(csv,'id,date,hypothesis,tier,model,task,profile,seed,status,checks,durationMs,tokens,cost_usd,calls,error,commit\n');
-// --complete <runs dir>: only the cells whose recorded run was stopped by the token ledger before reaching the model.
-const complete=arg('complete',null),pending=complete?new Set(mergeRuns([complete]).filter(r=>NOT_EXECUTED.has(r.error)).map(r=>[r.tier,r.taskId,r.profile,r.inference.seed].join('|'))):null;
-const jobs=[];for(const seed of seeds)for(const task of tasks)for(const profile of profiles)for(const tier of tiers)if(!pending||pending.has([tier,task,profile,seed].join('|')))jobs.push({seed,task,profile,tier});
+// --complete <runs dir>: only the cells without a recorded run that reached the model: runs stopped by the token ledger, and cells
+// never started because the USD cap refused them (E03). Runs that reached the model are never repeated.
+const complete=arg('complete',null),executed=complete?new Set(mergeRuns([complete]).filter(r=>!NOT_EXECUTED.has(r.error)).map(r=>[r.tier,r.taskId,r.profile,r.inference.seed].join('|'))):null;
+const jobs=[];for(const seed of seeds)for(const task of tasks)for(const profile of profiles)for(const tier of tiers)if(!executed||!executed.has([tier,task,profile,seed].join('|')))jobs.push({seed,task,profile,tier});
 console.log(`${jobs.length} runs`);
 const results=[];let next=0;
 async function worker(){
@@ -93,7 +97,7 @@ async function worker(){
   const run=makeRun(task,profile,TASKS.find(t=>t.id===task).tools,'bench',MODELS[tier].id,{seed,maxTokens});
   await executeRun(run,client,{health:()=>broker.execute('synthetic_health')});
   const s=JSON.stringify(run).split(key).join('[REDACTED]');await writeFile(join(out,'runs',run.id+'.json'),s);
-  results.push(JSON.parse(s));charge(1,[run.cost]);
+  results.push(JSON.parse(s));charge(1,[run]);
   const checks=run.result?`${run.result.passedCount}/${run.result.total}`:'';
   await appendFile(csv,[run.id,run.createdAt,hypothesis,tier,run.model,task,profile,seed,run.status,checks,run.durationMs,run.tokens??'',run.cost??'',run.calls.length,run.error??'',commit].join(',')+'\n');
   console.log(`${tier.padEnd(9)} ${task.padEnd(16)} ${profile.padEnd(8)} seed=${seed} ${run.status.padEnd(9)} ${checks.padEnd(5)} ${(run.durationMs/1000).toFixed(1)}s tok=${run.tokens??'?'} ${run.error??''}`);
