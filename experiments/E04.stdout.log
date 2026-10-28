@@ -1,0 +1,232 @@
+54 runs
+ultra     release-brief    careful  seed=11 passed    8/8   6.2s tok=3206 
+super     release-brief    careful  seed=11 failed    3/4   9.6s tok=4666 
+super     release-brief    lean     seed=11 failed    3/4   11.1s tok=4744 
+lightning release-brief    careful  seed=11 failed    7/8   21.1s tok=6624 
+ultra     release-brief    lean     seed=11 failed    7/8   4.1s tok=2811 
+super     invoice-cleanup  careful  seed=11 passed    6/6   10.4s tok=5141 
+ultra     invoice-cleanup  careful  seed=11 passed    6/6   4.0s tok=2632 
+lightning invoice-cleanup  careful  seed=11 passed    6/6   21.2s tok=5877 
+super     invoice-cleanup  lean     seed=11 passed    6/6   7.9s tok=2226 
+ultra     invoice-cleanup  lean     seed=11 passed    6/6   3.2s tok=2075 
+lightning release-brief    lean     seed=11 passed    8/8   78.4s tok=35884 
+lightning invoice-cleanup  lean     seed=11 passed    6/6   45.7s tok=11796 
+ultra     shipping-function careful  seed=11 passed    17/17 7.6s tok=5442 
+super     shipping-function careful  seed=11 passed    17/17 13.0s tok=4712 
+super     shipping-function lean     seed=11 passed    17/17 8.2s tok=4009 
+ultra     shipping-function lean     seed=11 passed    17/17 7.1s tok=5350 
+lightning shipping-function careful  seed=11 error           71.6s tok=19329 incomplete_response
+super     release-brief    careful  seed=22 failed    3/4   7.3s tok=3506 
+ultra     release-brief    careful  seed=22 failed    7/8   4.1s tok=2819 
+lightning release-brief    lean     seed=22 passed    8/8   29.4s tok=7455 
+super     release-brief    lean     seed=22 failed    3/4   8.2s tok=3478 
+ultra     release-brief    lean     seed=22 passed    8/8   3.6s tok=2928 
+lightning invoice-cleanup  careful  seed=22 passed    6/6   17.8s tok=6286 
+lightning shipping-function lean     seed=11 error           113.5s tok=43685 step_limit
+super     invoice-cleanup  careful  seed=22 passed    6/6   13.5s tok=3462 
+ultra     invoice-cleanup  careful  seed=22 passed    6/6   4.8s tok=2547 
+super     invoice-cleanup  lean     seed=22 passed    6/6   5.5s tok=2239 
+ultra     invoice-cleanup  lean     seed=22 passed    6/6   4.2s tok=2382 
+lightning invoice-cleanup  lean     seed=22 passed    6/6   15.4s tok=5713 
+lightning release-brief    careful  seed=22 error           126.9s tok=51773 step_limit
+ultra     shipping-function careful  seed=22 passed    17/17 6.4s tok=4735 
+super     shipping-function careful  seed=22 error           43.1s tok=25468 step_limit
+super     shipping-function lean     seed=22 passed    17/17 11.0s tok=5206 
+ultra     shipping-function lean     seed=22 passed    17/17 7.6s tok=4974 
+lightning shipping-function careful  seed=22 error           74.6s tok=23487 incomplete_response
+super     release-brief    careful  seed=33 failed    3/4   8.7s tok=3619 
+lightning release-brief    careful  seed=33 passed    8/8   19.4s tok=7144 
+ultra     release-brief    careful  seed=33 passed    8/8   3.9s tok=2929 
+super     release-brief    lean     seed=33 failed    3/4   8.3s tok=3188 
+ultra     release-brief    lean     seed=33 passed    8/8   4.9s tok=3002 
+lightning release-brief    lean     seed=33 failed    7/8   29.5s tok=10202 
+lightning invoice-cleanup  careful  seed=33 passed    6/6   21.2s tok=8318 
+ultra     invoice-cleanup  careful  seed=33 passed    6/6   3.6s tok=2095 
+super     invoice-cleanup  careful  seed=33 passed    6/6   13.2s tok=4145 
+lightning invoice-cleanup  lean     seed=33 passed    6/6   14.6s tok=5704 
+super     invoice-cleanup  lean     seed=33 passed    6/6   13.6s tok=3528 
+ultra     invoice-cleanup  lean     seed=33 passed    6/6   3.6s tok=2036 
+super     shipping-function careful  seed=33 error           54.7s tok=19018 incomplete_response
+lightning shipping-function lean     seed=22 error           180.0s tok=? run_timeout
+ultra     shipping-function careful  seed=33 passed    17/17 9.8s tok=5317 
+super     shipping-function lean     seed=33 passed    17/17 8.1s tok=4122 
+ultra     shipping-function lean     seed=33 passed    17/17 8.6s tok=4966 
+lightning shipping-function lean     seed=33 passed    17/17 31.7s tok=9526 
+lightning shipping-function careful  seed=33 error           180.0s tok=? run_timeout
+{
+ "byTier": {
+  "lightning": {
+   "model": "nvidia/Nemotron-3_5-Lightning",
+   "runs": 18,
+   "passRate": {
+    "mean": 0.5555555555555555,
+    "sd": 0.0962250448649376
+   },
+   "durationMs": {
+    "mean": 60667.666666666664,
+    "sd": 55142.5605925757
+   },
+   "tokens": {
+    "mean": 16175.1875
+   },
+   "costUSD": {
+    "mean": 0.00285234375,
+    "known": false
+   },
+   "throughputTokS": 226.97277764032899,
+   "errors": [
+    "incomplete_response",
+    "step_limit",
+    "step_limit",
+    "incomplete_response",
+    "run_timeout",
+    "run_timeout"
+   ]
+  },
+  "super": {
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "runs": 18,
+   "passRate": {
+    "mean": 0.5555555555555555,
+    "sd": 0.0962250448649376
+   },
+   "durationMs": {
+    "mean": 14197.166666666666,
+    "sd": 12987.352255854426
+   },
+   "tokens": {
+    "mean": 5915.388888888889
+   },
+   "costUSD": {
+    "mean": 0.003275483333333333,
+    "known": true
+   },
+   "throughputTokS": 139.82830192544972,
+   "errors": [
+    "step_limit",
+    "incomplete_response"
+   ]
+  },
+  "ultra": {
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "runs": 18,
+   "passRate": {
+    "mean": 0.888888888888889,
+    "sd": 0.0962250448649376
+   },
+   "durationMs": {
+    "mean": 5405.055555555556,
+    "sd": 2000.5792535346363
+   },
+   "tokens": {
+    "mean": 3458.1111111111113
+   },
+   "costUSD": {
+    "mean": 0.0058711111111111125,
+    "known": true
+   },
+   "throughputTokS": 138.2236842105263,
+   "errors": []
+  }
+ },
+ "policies": {
+  "ladder": {
+   "passRate": {
+    "mean": 0.9444444444444445,
+    "sd": 0.0962250448649376
+   },
+   "costUSD": 0.005674012499999999,
+   "costKnownCells": 16,
+   "costUSDLow": 0.0072676077777777785,
+   "costUSDHigh": 0.007752727777777778,
+   "durationMs": 71039.22222222222,
+   "durationMsMedian": 39858.5,
+   "durationMsMax": 244463,
+   "cells": 18
+  },
+  "always_ultra": {
+   "passRate": {
+    "mean": 0.888888888888889,
+    "sd": 0.0962250448649376
+   },
+   "costUSD": 0.0058711111111111125,
+   "costKnownCells": 18,
+   "costUSDLow": 0.0058711111111111125,
+   "costUSDHigh": 0.0058711111111111125,
+   "durationMs": 5405.055555555556,
+   "durationMsMedian": 4526,
+   "durationMsMax": 9782,
+   "cells": 18
+  },
+  "always_super": {
+   "passRate": {
+    "mean": 0.5555555555555555,
+    "sd": 0.0962250448649376
+   },
+   "costUSD": 0.003275483333333333,
+   "costKnownCells": 18,
+   "costUSDLow": 0.003275483333333333,
+   "costUSDHigh": 0.003275483333333333,
+   "durationMs": 14197.166666666666,
+   "durationMsMedian": 9996,
+   "durationMsMax": 54668,
+   "cells": 18
+  },
+  "speculative": {
+   "passRate": {
+    "mean": 0.9444444444444445,
+    "sd": 0.0962250448649376
+   },
+   "costUSD": 0.006947024999999999,
+   "costKnownCells": 16,
+   "costUSDLow": 0.008399174444444444,
+   "costUSDHigh": 0.008884294444444444,
+   "durationMs": 38623,
+   "durationMsMedian": 13564,
+   "durationMsMax": 189795,
+   "cells": 18
+  },
+  "tier_memory": {
+   "passRate": {
+    "mean": 0.9444444444444445,
+    "sd": 0.0962250448649376
+   },
+   "costUSD": 0.005037917777777777,
+   "costKnownCells": 18,
+   "costUSDLow": 0.005037917777777777,
+   "costUSDHigh": 0.005037917777777777,
+   "durationMs": 34234.72222222222,
+   "durationMsMedian": 21191,
+   "durationMsMax": 121701,
+   "cells": 18
+  },
+  "ladder_on_memory_cells": {
+   "passRate": {
+    "mean": 0.9444444444444445,
+    "sd": 0.0962250448649376
+   },
+   "costUSD": 0.005674012499999999,
+   "costKnownCells": 16,
+   "costUSDLow": 0.0072676077777777785,
+   "costUSDHigh": 0.007752727777777778,
+   "durationMs": 71039.22222222222,
+   "durationMsMedian": 39858.5,
+   "durationMsMax": 244463,
+   "cells": 18
+  },
+  "always_ultra_on_memory_cells": {
+   "passRate": {
+    "mean": 0.888888888888889,
+    "sd": 0.0962250448649376
+   },
+   "costUSD": 0.0058711111111111125,
+   "costKnownCells": 18,
+   "costUSDLow": 0.0058711111111111125,
+   "costUSDHigh": 0.0058711111111111125,
+   "durationMs": 5405.055555555556,
+   "durationMsMedian": 4526,
+   "durationMsMax": 9782,
+   "cells": 18
+  }
+ }
+}
