@@ -28,7 +28,7 @@ Each grid has 3 tasks × 2 agent profiles × 3 seeds × 3 Nemotron tiers. Hypoth
 | Mean time per task | 33 s vs 6 s | 55 s vs 7 s | 71 s vs 5 s |
 
 - **The ladder passed more tasks than always using Ultra in every experiment.** Super and Ultra fail on *different* tasks, so escalating on failed checks gets the best of both.
-- **Its cost advantage did not hold up.** It went from 34% cheaper to 32% dearer, because every failed cheap attempt is paid for. That is exactly why a team should measure its own tasks before choosing a policy, and why Studio exists.
+- **Its cost advantage did not hold up.** It went from 34% cheaper to up to 32% dearer, because every failed cheap attempt is paid for. That is exactly why a team should measure its own tasks before choosing a policy, and why Studio exists.
 - **Reasoning models need room.** With a 2,048-token output budget, Nemotron 3.5 Lightning ran out of tokens while thinking in 17 of 18 runs. At 8,192 tokens it passed 67%, and 8,192 is now the default.
 - **Ultra is the fastest tier per task**, at 5–7 s, because it needs the fewest turns and tokens.
 - **Two latency policies were tested in E04, and both missed their pre-registered 30 s target.** The speculative ladder (Lightning and Super together) halved the ladder's time, but it cost more than Ultra, so it was rejected and is not offered. Tier memory (start where the task last passed) kept the 94% pass rate in 34 s, at $0.0050 per task. That made it the cheapest policy at that pass rate, but it was also rejected on time, so it is our next experiment.
