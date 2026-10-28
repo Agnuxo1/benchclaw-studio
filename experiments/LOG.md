@@ -205,3 +205,24 @@ Codex (`codex exec`, gpt-6-sol, read-only) asked for four corrections before any
 4. **Real cancellation is tested.** A call cut at the run limit is reported as `run_timeout`. Behaviour change, stated plainly: a single provider call can now occupy a run for up to the run's 180 s limit, which a whole run could already do.
 5. **Clarification on timing and conditions.** H9-live compares live measurements with Part A controls measured at a different time. Per-tier median throughput is reported for both parts. If Lightning's or Super's median throughput in Part B differs from Part A by more than a factor of 2, H9-live is reported as confounded and the speculative ladder's product rule is not met. H9 and H10 are new tests under adjusted operating conditions, not independent confirmations of E03.
 6. **Second Codex check (same day, before any E04 call).** H10's controls are now computed on exactly the cells where tier memory is evaluated (`ladder_on_memory_cells` and `always_ultra_on_memory_cells` in the summary). The per-call worst case adds the ledger's 4,096-token allowance to the prompt bytes, to cover the request's structure, which is the same reservation method the token ledger uses.
+
+### E04 results (2026-10-28, 54/54 runs and 18/18 cells, commit d7c0411, `experiments/E04/summary.json`)
+
+All 54 runs reached the model, so no cell is missing and no completion pass was needed. Two Lightning runs hit the 180 s run limit (`run_timeout`, real failures); each stopped only its own ledger. Throughput, median completion tokens per second of call time: Lightning 227, Super 140, Ultra 138, so Lightning was close to its E02 speed. Pass rates are means over seeds ± SD. Costs are low – high bounds; 2 Lightning runs have an unknown last call.
+
+| Policy (E04) | Pass rate | Mean answer time | Median | Max | Cost per task (USD) |
+| --- | --- | --- | --- | --- | --- |
+| Sequential ladder (control) | 0.944 ± 0.096 | 71.0 s | 39.9 s | 244.5 s | 0.00727 – 0.00775 |
+| Always-Ultra (control) | 0.889 ± 0.096 | 5.4 s | 4.5 s | 9.8 s | 0.00587 |
+| Always-Super | 0.556 ± 0.096 | 14.2 s | 10.0 s | 54.7 s | 0.00328 |
+| **Speculative ladder (H9)** | 0.944 ± 0.096 | **38.6 s** | 13.6 s | 189.8 s | **0.00840 – 0.00888** |
+| **Tier memory (H10)** | 0.944 ± 0.096 | **34.2 s** | 21.2 s | 121.7 s | **0.00504** |
+
+Per tier: Lightning 0.556 ± 0.096 (60.7 s, $0.00285 per run), Super 0.556 ± 0.096 (14.2 s, $0.00328), Ultra 0.889 ± 0.096 (5.4 s, $0.00587). The ladder settled 10 cells on Lightning, 3 on Super and 4 on Ultra, and left 1 unresolved.
+
+- **H9: rejected.** (a) holds: 0.944 ≥ 0.944 − 0.05. (b) fails: 38.6 s is not < 30 s. (c) fails: the high bound $0.00888 is not below always-Ultra's low bound, $0.00587. The speculative ladder answered in about half the sequential ladder's time (38.6 s against 71.0 s; median 13.6 s against 39.9 s), but it pays for two tiers on every task, so it costs more than always-Ultra. **Part B was not run**, as pre-registered, and the speculative ladder is not added to the Studio.
+- **H10: rejected.** (a) holds: 0.944 ≥ 0.944 − 0.05, on the same 18 cells. (c) holds: $0.00504 < $0.00587. (b) fails: 34.2 s is not < 30 s. Reported without a decision rule: against the sequential ladder on the same cells, tier memory matched the pass rate, cut the mean answer time from 71.0 s to 34.2 s (−52%) and cut the cost from $0.00727 – 0.00775 to $0.00504 (−31% to −35%). By the product rule, it is not added, because H10 failed. It remains the most promising next step.
+- **H11: accepted.** No run ended with `provider_timeout`, and no cell was lost to a ledger stop. The call-timeout change stays in the release.
+- **A finding outside the pre-registered hypotheses, reported because it bears on the product's claim.** In E04, the sequential ladder passed more tasks than always-Ultra (0.944 against 0.889), but it **cost more**: $0.00727 – 0.00775 against $0.00587, which is +24% to +32%. Ultra passed more cells than in E02 (16/18 against 14/18), and Lightning passed fewer (10/18 against 12/18), so the ladder paid for more failed cheap attempts. Across the comparable experiments, the ladder's pass-rate gain over always-Ultra is consistent: +17 points in E01, +11 in E02, +6 in E04. Its cost against always-Ultra is not: −34% in E01 (2,048 tokens), −0.2% to −4% in E02, and +24% to +32% in E04 (both at 8,192 tokens).
+- **Secondary, retrospective (E02 grid, not confirmatory).** Speculative ladder: 0.889, mean 25.4 s, $0.00805 – 0.00830. Tier memory: 0.889, 46.1 s, $0.00608 – 0.00632. Sequential ladder: 0.889, 55.1 s, $0.00586 – 0.00611. Always-Ultra: 0.778, 7.2 s, $0.00612. `experiments/E02/summary-corrected.json` also records the corrected E02 bounds.
+- **Spend.** E04: $0.2310 by the per-call accounting, including worst cases for 2 calls without usage. Phase total, E03 to E04: at most $0.29.
