@@ -12,7 +12,7 @@ Run real agent tasks on NVIDIA Nemotron through **Nebius Token Factory**, let de
 ![NVIDIA Nemotron](https://img.shields.io/badge/NVIDIA-Nemotron%203%20%7C%203.5-76b900.svg)
 ![Nebius Token Factory](https://img.shields.io/badge/Nebius-Token%20Factory-0d1b2a.svg)
 
-**[Live replay demo](https://agnuxo1.github.io/benchclaw-studio/)** · **[Demo video](#demo-video)** · **[Results](#results-e01)** · **[Quick start](#quick-start)**
+**[Live replay demo](https://agnuxo1.github.io/benchclaw-studio/)** · **[Demo video](https://youtu.be/gVSO4OD6mh8)** · **[Results](#results)** · **[Quick start](#quick-start)**
 
 <img src="docs/media/architecture.gif" alt="Auto-tier ladder: the Studio API sends a task to Nemotron 3.5 Lightning; its checks fail, so it escalates to Nemotron 3 Super, which passes; Ultra is never called" width="900">
 
@@ -75,6 +75,19 @@ Full tables, failure analysis and the deviation note are in [`experiments/LOG.md
 | `scripts/bench-tiers.mjs` | The pre-registered E01 and E02 grids on all three tiers (108 live runs) | The routing claim is measured, not asserted |
 
 Token Factory accelerated this project in two ways. First, all three Nemotron tiers sit behind one endpoint and one key, so the comparison needed no infrastructure. Second, it reports usage per call, so cost per task comes straight from provider receipts.
+
+## Feedback on Nebius Token Factory and NVIDIA Nemotron
+
+What worked well:
+- **One endpoint and one key for every Nemotron tier.** Because Token Factory is OpenAI-compatible, the ladder is a single `model` field. No extra infrastructure was needed to compare 30B, 120B and 550B models.
+- **Usage is reported per call, including `reasoning_tokens`.** That made cost per task and the E01 diagnosis possible from provider data alone.
+- **Request IDs on every response** make each recorded run traceable.
+- **Nemotron 3 Ultra was the fastest tier we measured**, with the fewest turns and tokens per task.
+
+What would help builders:
+- **Guidance on output budgets for reasoning models.** Reasoning tokens count against `max_tokens`. At 2,048, Nemotron 3.5 Lightning stopped with `finish_reason=length` in 17 of 18 runs, before writing any answer. A documented recommended budget, or a reasoning-effort or budget parameter, would prevent this silent failure.
+- **Consistent model ids.** The catalog shows `Nemotron-3.5-Lightning`, while the API id is `nvidia/Nemotron-3_5-Lightning`, and casing differs across tiers (`nemotron-3-super-120b-a12b` versus `Nemotron-3-Ultra-550b-a55b`).
+- **Empty content with `finish_reason=stop`.** It happened once, when the model returned only reasoning. A distinct finish reason would make this case explicit.
 
 ## Quick start
 
@@ -143,7 +156,9 @@ tests/       node:test suite (offline, scripted providers only)
 
 ## Demo video
 
-_Link added at release._
+[![BenchClaw Studio demo video (2:40)](https://i.ytimg.com/vi/gVSO4OD6mh8/hqdefault.jpg)](https://youtu.be/gVSO4OD6mh8)
+
+**[Watch on YouTube (2:40)](https://youtu.be/gVSO4OD6mh8)**: the problem, a live auto-tier ladder run on Token Factory, the E01/E02 metrics and the architecture.
 
 ## Limitations
 
