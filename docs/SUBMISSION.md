@@ -1,6 +1,6 @@
 # BenchClaw Studio: hackathon submission text
 
-This is the project story submitted to the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents). Video: VIDEO_URL · Demo: https://agnuxo1.github.io/benchclaw-studio/
+This is the project story submitted to the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents). Video: https://youtu.be/LpHwFtMeQzY · Demo: https://agnuxo1.github.io/benchclaw-studio/
 
 *Updated on 2026-10-28: two more pre-registered experiments (E03, E04), a call-timeout fix found by measurement, and two corrections. For E02 we first reported 89% of tasks passed at a 33% cost saving. The cost left out one cell whose cost was unknown, and the pass rate counted reruns that our pre-registered rule does not allow. See "Challenges".*
 
