@@ -44,3 +44,11 @@ test('Per-call model override is limited to published Nemotron tiers',async()=>{
  await client.complete([],{model:MODELS.ultra.id,seed:22});assert.equal(body.model,MODELS.ultra.id);assert.equal(body.seed,22);
  await assert.rejects(()=>client.complete([],{model:'meta/llama'}),e=>e.code==='model_not_allowed');
 });
+test('Run output budget reaches every provider call and is bounded',async()=>{
+ const seen=[];const client={model:MODELS.super.id,async complete(messages,o){seen.push(o.maxTokens);return {content:JSON.stringify(quit[0]),evidence:{provider:'scripted',model:o.model,status:200,durationMs:1,usage:{prompt_tokens:1,completion_tokens:1,total_tokens:2},finishReason:'stop'}};}};
+ const {makeRun,executeRun}=await import('../server/engine.mjs');
+ const run=makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id,{maxTokens:8192});await executeRun(run,client);
+ assert.equal(run.inference.maxTokens,8192);assert.deepEqual(seen,[8192]);
+ assert.equal(makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id,{maxTokens:1e9}).inference.maxTokens,2048);
+ assert.equal(makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id).inference.maxTokens,2048);
+});
