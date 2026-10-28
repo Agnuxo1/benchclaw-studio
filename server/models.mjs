@@ -1,8 +1,8 @@
 // NVIDIA Nemotron tiers served by Nebius Token Factory, cheapest first.
-// Prices are USD per 1M tokens as published by Nebius; null means unverified, so cost stays unknown.
+// Prices are USD per 1M uncached tokens from the Token Factory model catalog (checked 2026-10-28); null means unverified, so cost stays unknown.
 export const MODELS={
- lightning:{id:'nvidia/Nemotron-3_5-Lightning',label:'Nemotron 3.5 Lightning',size:'30B total · 3B active',price:{input:null,output:null}},
- super:{id:'nvidia/nemotron-3-super-120b-a12b',label:'Nemotron 3 Super',size:'120B total · 12B active',price:{input:null,output:null}},
+ lightning:{id:'nvidia/Nemotron-3_5-Lightning',label:'Nemotron 3.5 Lightning',size:'30B total · 3B active',price:{input:0.06,output:0.24}},
+ super:{id:'nvidia/nemotron-3-super-120b-a12b',label:'Nemotron 3 Super',size:'120B total · 12B active',price:{input:0.3,output:0.9}},
  ultra:{id:'nvidia/Nemotron-3-Ultra-550b-a55b',label:'Nemotron 3 Ultra',size:'550B total · 55B active',price:{input:1,output:3}}
 };
 export const LADDER=['lightning','super','ultra'];
