@@ -1,0 +1,2 @@
+id,date,hypothesis,configuration,commit,metric,decision
+E01,2026-10-28,"H1 ladder non-inferior to Ultra at lower cost; H2 latency Lightning<Super<Ultra; H3 pass Ultra>=Super>=Lightning","3 tasks x 2 profiles x seeds 11,22,33 x 3 tiers; temp 0; 12 turns; 2048 out tok",pending,"pass rate / run time / tokens / USD",pending

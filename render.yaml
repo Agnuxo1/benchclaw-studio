@@ -1,0 +1,27 @@
+# Render Blueprint for the public BenchClaw Studio demo.
+# NEBIUS_API_KEY is entered by the operator in the Render dashboard (sync: false); it is never committed.
+services:
+  - type: web
+    name: benchclaw-studio
+    runtime: node
+    plan: free
+    buildCommand: npm ci --ignore-scripts
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 22.18.0
+      - key: STUDIO_BIND
+        value: 0.0.0.0
+      - key: STUDIO_PUBLIC_ORIGIN
+        value: https://benchclaw-studio.onrender.com
+      - key: STUDIO_INFERENCE_ENABLED
+        value: "1"
+      - key: STUDIO_MAX_RUNS
+        value: "300"
+      - key: STUDIO_MAX_RUNS_PER_OWNER
+        value: "6"
+      - key: STUDIO_MAX_TOTAL_TOKENS
+        value: "2000000"
+      - key: NEBIUS_API_KEY
+        sync: false
