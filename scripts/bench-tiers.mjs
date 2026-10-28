@@ -14,7 +14,7 @@ import {TokenBudget} from '../server/token-budget.mjs';
 import {TASKS} from '../server/tasks.mjs';
 import {makeRun,executeRun,PROFILES} from '../server/engine.mjs';
 import {MODELS,LADDER} from '../server/models.mjs';
-import {evaluatePolicy} from '../server/ladder.mjs';
+import {summarize,mergeRuns,NOT_EXECUTED} from './summarize.mjs';
 const arg=(name,fallback)=>{const i=process.argv.indexOf('--'+name);return i>0?process.argv[i+1]:fallback;};
 const out=arg('out','experiments/E01'),tiers=arg('tiers',LADDER.join(',')).split(','),seeds=arg('seeds','11,22,33').split(',').map(Number);
 const profiles=arg('profiles',Object.keys(PROFILES).join(',')).split(','),tasks=arg('tasks',TASKS.map(t=>t.id).join(',')).split(',');
@@ -36,7 +36,10 @@ const budget=new TokenBudget(cap,existsSync(ledgerFile)?JSON.parse(readFileSync(
 const client=new NebiusClient(()=>vault.resolve('nebius_api','https://api.tokenfactory.nebius.com'),MODELS.super.id,undefined,budget);
 const csv=join(out,'results.csv');
 if(!existsSync(csv))await writeFile(csv,'id,date,hypothesis,tier,model,task,profile,seed,status,checks,durationMs,tokens,cost_usd,calls,error,commit\n');
-const jobs=[];for(const seed of seeds)for(const task of tasks)for(const profile of profiles)for(const tier of tiers)jobs.push({seed,task,profile,tier});
+// --complete <runs dir>: only the cells whose recorded run was stopped by the token ledger before reaching the model.
+const complete=arg('complete',null),pending=complete?new Set(mergeRuns([complete]).filter(r=>NOT_EXECUTED.has(r.error)).map(r=>[r.tier,r.taskId,r.profile,r.inference.seed].join('|'))):null;
+const jobs=[];for(const seed of seeds)for(const task of tasks)for(const profile of profiles)for(const tier of tiers)if(!pending||pending.has([tier,task,profile,seed].join('|')))jobs.push({seed,task,profile,tier});
+console.log(`${jobs.length} runs`);
 const results=[];let next=0;
 async function worker(){
  while(next<jobs.length){
@@ -52,22 +55,6 @@ async function worker(){
 }
 await Promise.all(Array.from({length:concurrency},worker));
 service.close();
-// Aggregates: mean and sample standard deviation across seeds, plus offline ladder policy evaluation.
-const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
-const sd=a=>a.length>1?Math.sqrt(a.reduce((s,x)=>s+(x-mean(a))**2,0)/(a.length-1)):null;
-const summary={generatedAt:new Date().toISOString(),commit,tiers,seeds,profiles,tasks,maxTokens,tokenLedger:budget.snapshot(),byTier:{},policies:{}};
-for(const tier of tiers){
- const rs=results.filter(r=>r.tier===tier);const perSeed=seeds.map(s=>rs.filter(r=>r.inference.seed===s));
- summary.byTier[tier]={model:MODELS[tier].id,runs:rs.length,passRate:{mean:mean(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length)),sd:sd(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length))},
-  durationMs:{mean:mean(rs.map(r=>r.durationMs)),sd:sd(rs.map(r=>r.durationMs))},tokens:{mean:mean(rs.filter(r=>r.tokens!==null).map(r=>r.tokens))},costUSD:{mean:mean(rs.filter(r=>r.cost!==null).map(r=>r.cost)),known:rs.every(r=>r.cost!==null)},errors:rs.filter(r=>r.status==='error').map(r=>r.error)};
-}
-if(LADDER.every(t=>tiers.includes(t))){
- const cells=[];for(const seed of seeds)for(const task of tasks)for(const profile of profiles){const grid=Object.fromEntries(LADDER.map(t=>[t,results.find(r=>r.tier===t&&r.taskId===task&&r.profile===profile&&r.inference.seed===seed)]));cells.push({seed,task,profile,ladder:evaluatePolicy(grid),ultra:grid.ultra,super:grid.super});}
- const pol=(name,pick)=>{const per=seeds.map(s=>cells.filter(c=>c.seed===s).map(pick));summary.policies[name]={passRate:{mean:mean(per.map(g=>g.filter(x=>x.passed).length/g.length)),sd:sd(per.map(g=>g.filter(x=>x.passed).length/g.length))},costUSD:mean(cells.map(pick).map(x=>x.cost).filter(Number.isFinite)),durationMs:mean(cells.map(pick).map(x=>x.durationMs))};};
- pol('ladder',c=>({passed:!!c.ladder.chosenTier,cost:c.ladder.cost,durationMs:c.ladder.durationMs}));
- pol('always_ultra',c=>({passed:c.ultra.status==='passed',cost:c.ultra.cost,durationMs:c.ultra.durationMs}));
- pol('always_super',c=>({passed:c.super.status==='passed',cost:c.super.cost,durationMs:c.super.durationMs}));
- summary.cells=cells.map(c=>({seed:c.seed,task:c.task,profile:c.profile,chosenTier:c.ladder.chosenTier,path:c.ladder.path}));
-}
+const summary=summarize(results,{tiers,seeds,profiles,tasks,commit,maxTokens,tokenLedger:budget.snapshot(),completes:complete});
 await writeFile(join(out,'summary.json'),JSON.stringify(summary,null,2));
 console.log(JSON.stringify({byTier:summary.byTier,policies:summary.policies},null,1));

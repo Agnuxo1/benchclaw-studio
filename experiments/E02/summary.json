@@ -1,0 +1,334 @@
+{
+  "generatedAt": "2026-10-28T12:38:59.102Z",
+  "commit": "b271809",
+  "tiers": [
+    "lightning",
+    "super",
+    "ultra"
+  ],
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "profiles": [
+    "careful",
+    "lean"
+  ],
+  "tasks": [
+    "release-brief",
+    "invoice-cleanup",
+    "shipping-function"
+  ],
+  "maxTokens": 8192,
+  "tokenLedger": {
+    "limit": 3000000,
+    "charged": 286685,
+    "remaining": 2713315,
+    "blocked": "provider_usage_unavailable",
+    "method": "UTF-8 prompt bytes + 4096 allowance + maximum output reserved before each call; reported tokens reconciled afterward. Not a monetary limit."
+  },
+  "byTier": {
+    "lightning": {
+      "model": "nvidia/Nemotron-3_5-Lightning",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.38888888888888884,
+        "sd": 0.3469443332443554
+      },
+      "durationMs": {
+        "mean": 23965.722222222223,
+        "sd": 42925.846220451276
+      },
+      "tokens": {
+        "mean": 11082.5
+      },
+      "costUSD": {
+        "mean": 0.0017849639999999996,
+        "known": false
+      },
+      "errors": [
+        "incomplete_response",
+        "run_timeout",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_budget_overrun"
+      ]
+    },
+    "super": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.38888888888888884,
+        "sd": 0.3469443332443554
+      },
+      "durationMs": {
+        "mean": 10679.111111111111,
+        "sd": 17396.00078749978
+      },
+      "tokens": {
+        "mean": 6047.363636363636
+      },
+      "costUSD": {
+        "mean": 0.003386645454545455,
+        "known": false
+      },
+      "errors": [
+        "step_limit",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_budget_overrun"
+      ]
+    },
+    "ultra": {
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.4444444444444445,
+        "sd": 0.41943524640393054
+      },
+      "durationMs": {
+        "mean": 2473.222222222222,
+        "sd": 2633.2479062837415
+      },
+      "tokens": {
+        "mean": 3229.7
+      },
+      "costUSD": {
+        "mean": 0.0055544999999999995,
+        "known": false
+      },
+      "errors": [
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown",
+        "token_accounting_unknown"
+      ]
+    }
+  },
+  "policies": {
+    "ladder": {
+      "passRate": {
+        "mean": 0.5,
+        "sd": 0.44095855184409843
+      },
+      "costUSD": 0.0029016644444444448,
+      "durationMs": 30585.277777777777
+    },
+    "always_ultra": {
+      "passRate": {
+        "mean": 0.4444444444444445,
+        "sd": 0.41943524640393054
+      },
+      "costUSD": 0.0055544999999999995,
+      "durationMs": 2473.222222222222
+    },
+    "always_super": {
+      "passRate": {
+        "mean": 0.38888888888888884,
+        "sd": 0.3469443332443554
+      },
+      "costUSD": 0.003386645454545455,
+      "durationMs": 10679.111111111111
+    }
+  },
+  "cells": [
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    }
+  ]
+}
