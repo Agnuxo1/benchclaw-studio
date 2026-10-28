@@ -1,0 +1,329 @@
+{
+  "generatedAt": "2026-10-28T12:35:02.149Z",
+  "commit": "bd4dab2",
+  "tiers": [
+    "lightning",
+    "super",
+    "ultra"
+  ],
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "profiles": [
+    "careful",
+    "lean"
+  ],
+  "tasks": [
+    "release-brief",
+    "invoice-cleanup",
+    "shipping-function"
+  ],
+  "tokenLedger": {
+    "limit": 3000000,
+    "charged": 243570,
+    "remaining": 2756430,
+    "blocked": null,
+    "method": "UTF-8 prompt bytes + 4096 allowance + maximum output reserved before each call; reported tokens reconciled afterward. Not a monetary limit."
+  },
+  "byTier": {
+    "lightning": {
+      "model": "nvidia/Nemotron-3_5-Lightning",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.05555555555555555,
+        "sd": 0.09622504486493763
+      },
+      "durationMs": {
+        "mean": 17878.222222222223,
+        "sd": 9013.856604633163
+      },
+      "tokens": {
+        "mean": 4091.5555555555557
+      },
+      "costUSD": {
+        "mean": 0.0007701033333333332,
+        "known": true
+      },
+      "errors": [
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response"
+      ]
+    },
+    "super": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "durationMs": {
+        "mean": 14048.444444444445,
+        "sd": 10737.019244717685
+      },
+      "tokens": {
+        "mean": 5104.888888888889
+      },
+      "costUSD": {
+        "mean": 0.0027226000000000004,
+        "known": true
+      },
+      "errors": [
+        "step_limit"
+      ]
+    },
+    "ultra": {
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "durationMs": {
+        "mean": 6122.5,
+        "sd": 5309.557445277891
+      },
+      "tokens": {
+        "mean": 4335.222222222223
+      },
+      "costUSD": {
+        "mean": 0.007799777777777779,
+        "known": true
+      },
+      "errors": [
+        "incomplete_response",
+        "incomplete_response",
+        "incomplete_response"
+      ]
+    }
+  },
+  "policies": {
+    "ladder": {
+      "passRate": {
+        "mean": 0.8333333333333334,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.005126792222222221,
+      "durationMs": 32663.722222222223
+    },
+    "always_ultra": {
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.007799777777777779,
+      "durationMs": 6122.5
+    },
+    "always_super": {
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.0027226,
+      "durationMs": 14048.444444444445
+    }
+  },
+  "cells": [
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    }
+  ]
+}

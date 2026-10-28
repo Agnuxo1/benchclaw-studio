@@ -25,6 +25,6 @@ export class TokenBudget {
   else{const overrun=total>c.charge;c.charge=total;c.status='reported';if(overrun)this.state.blocked='reservation_exceeded';}
   this.persist(this.state);
   if(!known)stop('token_accounting_unknown');
-  if(this.state.blocked)stop('token_budget_overrun');
+  if(this.state.blocked)stop(this.state.blocked==='reservation_exceeded'?'token_budget_overrun':'token_accounting_unknown');
  }
 }

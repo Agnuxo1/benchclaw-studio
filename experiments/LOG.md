@@ -22,7 +22,24 @@ The registry with one row per experiment is [`experiments.csv`](experiments.csv)
 
 **Stopping rule.** Hard token reservation cap of 3,000,000 (application ledger). Any `token_*` error stops the experiment, and runs completed so far are reported as partial.
 
-**Results.** _Pending. Filled in only from `experiments/E01/summary.json`._
+**Results (2026-10-28, 54/54 runs, commit a3eb5b0 settings, `experiments/E01/summary.json`).** Pass rates are means over the three seeds ± sample SD. Cost and time are means per task.
+
+| Tier / policy | Pass rate | Mean run time | Mean tokens | Mean cost (USD) |
+| --- | --- | --- | --- | --- |
+| Nemotron 3.5 Lightning | 0.056 ± 0.096 | 17.9 s | 4,092 | 0.00077 |
+| Nemotron 3 Super (control) | 0.667 ± 0.167 | 14.0 s | 5,105 | 0.00272 |
+| Nemotron 3 Ultra | 0.667 ± 0.167 | 6.1 s | 4,335 | 0.00780 |
+| **Ladder** (Lightning → Super → Ultra) | **0.833 ± 0.167** | 32.7 s | — | **0.00513** |
+
+- **H1: accepted.** Ladder 0.833 ≥ always-Ultra 0.667 − 0.05, and ladder cost $0.00513 < always-Ultra $0.00780, which is 34% less. The ladder resolved 15 of 18 cells: 1 on Lightning, 11 on Super and 3 on Ultra. Three cells stayed unresolved. The ladder beats both single tiers on pass rate because Super and Ultra fail on *different* cells (see below), and it makes up to three attempts per task. The ladder is slower (32.7 s), since it adds the time of every tier it tries.
+- **H2: rejected.** Ultra was the *fastest* tier at 6.1 s, ahead of Super at 14.0 s and Lightning at 17.9 s. Both pre-registered inequalities failed. Ultra used fewer turns and served more tokens per second on Token Factory.
+- **H3: accepted.** Ultra 0.667 ≥ Super 0.667 ≥ Lightning 0.056. Ultra and Super tie.
+- **Failure analysis.**
+  - Lightning failed 17 of 18 runs with `incomplete_response`. The provider returned `finish_reason=length` at the 2,048-token output cap, mostly in reasoning tokens. This motivated E02.
+  - Super failed `release-brief` 5 times out of 6 on "Output is valid and executable", that is, its brief did not validate.
+  - Ultra failed `release-brief` 3 times on "All required policy evidence cited", and stopped 3 `shipping-function` runs at the output cap.
+  - Super hit the 12-turn limit once.
+- **Spend.** The ledger reserved 243,570 of 3,000,000 tokens. The provider-reported cost of all 54 runs, summed from the per-run costs, was about $0.20.
 
 ## E02 — Output-token budget for reasoning tiers (pre-registered 2026-10-28, while E01 was running and before any E02 call)
 
@@ -41,3 +58,16 @@ The registry with one row per experiment is [`experiments.csv`](experiments.csv)
 **Stopping rule.** Separate token ledger, with a cap of 3,000,000.
 
 **Results.** _Pending. Filled in only from `experiments/E02/summary.json`._
+
+### E02 stopping event and E02b completion (written 2026-10-28, before any E02b call)
+
+**What happened.** The E02 stopping rule fired as designed:
+- At 12:38:47 UTC, a Lightning `shipping-function` run (seed 11, careful profile) reached the 180 s run timeout while a provider call was still open.
+- That call was aborted, and its usage could not be reported (`provider_usage_unavailable`).
+- The ledger then refused every later admission. Two calls already in flight were stopped at settlement, and 22 more runs never reached the model.
+
+In total, **24 of the 54 runs were not executed**: every run whose error is `token_accounting_unknown` or `token_budget_overrun`. The timed-out run itself counts as a real failure (`run_timeout`).
+
+The error code shown for blocked calls was misleading: `token_budget_overrun` appeared even though no reservation had been exceeded. It has been corrected to `token_accounting_unknown` (`server/token-budget.mjs`). This is a reporting fix only and does not change what the ledger blocks.
+
+**Deviation (documented).** E02b runs **only those 24 cells**, with identical settings (8,192 output tokens, same seeds, tasks, profiles and limits) and a fresh ledger with a cap of 3,000,000 (`scripts/bench-tiers.mjs --complete experiments/E02/runs`). E02 is then evaluated on the union, using `scripts/summarize.mjs`. A later run replaces a cell only when the earlier run never reached the model. No executed run is ever replaced. If the ledger stops E02b too, the remaining cells are reported as missing and the hypotheses are judged only on complete cells.
