@@ -62,3 +62,11 @@ test('Summary adds speculative and tier-memory policies without changing the exi
  assert.ok(Math.abs(s.policies.tier_memory.costUSD-(0.004+0.013)/2)<1e-12);
  assert.equal(evaluatePolicy({lightning:run('lightning','x',1,'passed',1,1)}).chosenTier,'lightning');
 });
+test('A provider call may use the run remaining time instead of a fixed 45 s',async()=>{
+ const {makeRun,executeRun}=await import('../server/engine.mjs');const {NebiusClient}=await import('../server/nebius.mjs');
+ const seen=[];const client=new NebiusClient(async()=>'synthetic-test-key',MODELS.super.id,async(url,b,o)=>{seen.push(o.timeoutMs);return {choices:[{message:{content:'{"finish":true}'},finish_reason:'stop'}],usage:{prompt_tokens:1,completion_tokens:1,total_tokens:2}};});
+ const run=makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id);await executeRun(run,client);
+ assert.equal(seen.length,1);assert.ok(seen[0]>171000&&seen[0]<=181000,String(seen[0]));
+ const legacy=[];await new NebiusClient(async()=>'k',MODELS.super.id,async(u,b,o)=>{legacy.push(o.timeoutMs);return {choices:[{message:{content:'{}'},finish_reason:'stop'}],usage:{prompt_tokens:1,completion_tokens:1,total_tokens:2}};}).complete([]);
+ assert.deepEqual(legacy,[undefined]);
+});

@@ -1,0 +1,213 @@
+47 runs
+ultra     invoice-cleanup  careful  seed=11 passed    6/6   4.5s tok=2253 
+super     invoice-cleanup  lean     seed=11 passed    6/6   9.8s tok=2671 
+ultra     invoice-cleanup  lean     seed=11 passed    6/6   2.7s tok=2075 
+lightning invoice-cleanup  careful  seed=11 passed    6/6   60.4s tok=6605 
+super     shipping-function careful  seed=11 passed    17/17 13.9s tok=5678 
+ultra     shipping-function careful  seed=11 passed    17/17 9.9s tok=5489 
+lightning shipping-function careful  seed=11 error           70.5s tok=? provider_timeout
+super     shipping-function lean     seed=11 error           0.0s tok=? token_accounting_unknown
+ultra     shipping-function lean     seed=11 error           0.0s tok=? token_accounting_unknown
+lightning release-brief    careful  seed=22 error           0.0s tok=? token_accounting_unknown
+super     release-brief    careful  seed=22 error           0.0s tok=? token_accounting_unknown
+ultra     release-brief    careful  seed=22 error           0.0s tok=? token_accounting_unknown
+lightning release-brief    lean     seed=22 error           0.0s tok=? token_accounting_unknown
+super     release-brief    lean     seed=22 error           0.0s tok=? token_accounting_unknown
+ultra     release-brief    lean     seed=22 error           0.0s tok=? token_accounting_unknown
+lightning invoice-cleanup  careful  seed=22 error           0.0s tok=? token_accounting_unknown
+super     invoice-cleanup  careful  seed=22 error           0.0s tok=? token_accounting_unknown
+ultra     invoice-cleanup  careful  seed=22 error           0.0s tok=? token_accounting_unknown
+lightning invoice-cleanup  lean     seed=22 error           0.0s tok=? token_accounting_unknown
+super     invoice-cleanup  lean     seed=22 error           0.0s tok=? token_accounting_unknown
+ultra     invoice-cleanup  lean     seed=22 error           0.0s tok=? token_accounting_unknown
+lightning shipping-function careful  seed=22 error           0.0s tok=? token_accounting_unknown
+super     shipping-function careful  seed=22 error           0.0s tok=? token_accounting_unknown
+ultra     shipping-function careful  seed=22 error           0.0s tok=? token_accounting_unknown
+lightning shipping-function lean     seed=22 error           0.0s tok=? token_accounting_unknown
+super     shipping-function lean     seed=22 error           0.0s tok=? token_accounting_unknown
+ultra     shipping-function lean     seed=22 error           0.0s tok=? token_accounting_unknown
+lightning release-brief    careful  seed=33 error           0.0s tok=? token_accounting_unknown
+super     release-brief    careful  seed=33 error           0.0s tok=? token_accounting_unknown
+ultra     release-brief    careful  seed=33 error           0.0s tok=? token_accounting_unknown
+lightning release-brief    lean     seed=33 error           0.0s tok=? token_accounting_unknown
+super     release-brief    lean     seed=33 error           0.0s tok=? token_accounting_unknown
+ultra     release-brief    lean     seed=33 error           0.0s tok=? token_accounting_unknown
+lightning invoice-cleanup  careful  seed=33 error           0.0s tok=? token_accounting_unknown
+super     invoice-cleanup  careful  seed=33 error           0.0s tok=? token_accounting_unknown
+ultra     invoice-cleanup  careful  seed=33 error           0.0s tok=? token_accounting_unknown
+lightning invoice-cleanup  lean     seed=33 error           0.0s tok=? token_accounting_unknown
+super     invoice-cleanup  lean     seed=33 error           0.0s tok=? token_accounting_unknown
+ultra     invoice-cleanup  lean     seed=33 error           0.0s tok=? token_accounting_unknown
+lightning shipping-function careful  seed=33 error           0.0s tok=? token_accounting_unknown
+super     shipping-function careful  seed=33 error           0.0s tok=? token_accounting_unknown
+ultra     shipping-function careful  seed=33 error           0.0s tok=? token_accounting_unknown
+lightning shipping-function lean     seed=33 error           0.0s tok=? token_accounting_unknown
+super     shipping-function lean     seed=33 error           0.0s tok=? token_accounting_unknown
+ultra     shipping-function lean     seed=33 error           0.0s tok=? token_accounting_unknown
+lightning shipping-function lean     seed=11 error           5.5s tok=720 token_accounting_unknown
+lightning invoice-cleanup  lean     seed=11 error           93.4s tok=9868 token_accounting_unknown
+{
+ "byTier": {
+  "lightning": {
+   "model": "nvidia/Nemotron-3_5-Lightning",
+   "runs": 16,
+   "passRate": {
+    "mean": 0.08333333333333333,
+    "sd": 0.14433756729740646
+   },
+   "durationMs": {
+    "mean": 14360.6875,
+    "sd": 30625.070861890807
+   },
+   "tokens": {
+    "mean": 5731
+   },
+   "costUSD": {
+    "mean": 0.0011033399999999997,
+    "known": false
+   },
+   "errors": [
+    "provider_timeout",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown"
+   ]
+  },
+  "super": {
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "runs": 15,
+   "passRate": {
+    "mean": 0.2222222222222222,
+    "sd": 0.3849001794597505
+   },
+   "durationMs": {
+    "mean": 1578.6666666666667,
+    "sd": 4237.669350457812
+   },
+   "tokens": {
+    "mean": 4174.5
+   },
+   "costUSD": {
+    "mean": 0.00226875,
+    "known": false
+   },
+   "errors": [
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown"
+   ]
+  },
+  "ultra": {
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "runs": 16,
+   "passRate": {
+    "mean": 0.25,
+    "sd": 0.4330127018922193
+   },
+   "durationMs": {
+    "mean": 1071.4375,
+    "sd": 2673.9220374760366
+   },
+   "tokens": {
+    "mean": 3272.3333333333335
+   },
+   "costUSD": {
+    "mean": 0.005863,
+    "known": false
+   },
+   "errors": [
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown"
+   ]
+  }
+ },
+ "policies": {
+  "ladder": {
+   "passRate": {
+    "mean": 0.2222222222222222,
+    "sd": 0.3849001794597505
+   },
+   "costUSD": 0.0036133199999999997,
+   "durationMs": 12868.8,
+   "durationMsMedian": 0,
+   "durationMsMax": 103170,
+   "cells": 15
+  },
+  "always_ultra": {
+   "passRate": {
+    "mean": 0.2222222222222222,
+    "sd": 0.3849001794597505
+   },
+   "costUSD": 0.006685999999999999,
+   "durationMs": 840.4,
+   "durationMsMedian": 0,
+   "durationMsMax": 9879,
+   "cells": 15
+  },
+  "always_super": {
+   "passRate": {
+    "mean": 0.2222222222222222,
+    "sd": 0.3849001794597505
+   },
+   "costUSD": 0.00226875,
+   "durationMs": 1578.6666666666667,
+   "durationMsMedian": 0,
+   "durationMsMax": 13892,
+   "cells": 15
+  },
+  "speculative": {
+   "passRate": {
+    "mean": 0.2222222222222222,
+    "sd": 0.3849001794597505
+   },
+   "costUSD": 0.0036133199999999997,
+   "durationMs": 1944.7333333333333,
+   "durationMsMedian": 0,
+   "durationMsMax": 13892,
+   "cells": 15
+  },
+  "tier_memory": {
+   "passRate": {
+    "mean": 0.2222222222222222,
+    "sd": 0.3849001794597505
+   },
+   "costUSD": 0.0036133199999999997,
+   "durationMs": 12868.8,
+   "durationMsMedian": 0,
+   "durationMsMax": 103170,
+   "cells": 15
+  }
+ }
+}
