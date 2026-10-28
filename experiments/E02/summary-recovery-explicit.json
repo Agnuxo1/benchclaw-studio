@@ -1,0 +1,525 @@
+{
+  "generatedAt": "2026-10-28T15:13:05.889Z",
+  "sources": [
+    "experiments/E02/runs",
+    "experiments/E02b/runs"
+  ],
+  "maxTokens": 8192,
+  "notExecuted": 0,
+  "mergeAudit": {
+    "historyRuns": 78,
+    "providerAttemptedRuns": 56,
+    "replacements": [
+      {
+        "cell": "super|release-brief|lean|33",
+        "previousId": "2fb641e0-5ce3-45c3-85ce-6ae48792c60f",
+        "nextId": "01d9379c-8d45-4d2f-a9dc-12e5593bc55b",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|lean|33",
+        "previousId": "32846ebd-498f-44d8-85ea-9bc234b4fcc0",
+        "nextId": "0c5739f2-3090-4967-b908-0d1e01c713fa",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|shipping-function|careful|33",
+        "previousId": "05569f11-6ac0-413d-aadf-b4a9fcbcf87f",
+        "nextId": "1d5cfda2-7e70-4645-bcef-13b0e9bea226",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|invoice-cleanup|careful|33",
+        "previousId": "d5252f0e-b620-41cd-9d48-bd2fceb53889",
+        "nextId": "2293dc09-4efc-47fb-99e9-5f9cf60b95d1",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|invoice-cleanup|careful|33",
+        "previousId": "cad40283-b7c5-4d67-9315-8dd607c81266",
+        "nextId": "2b184dd5-c5fe-4fea-bed5-cfa38feec326",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|invoice-cleanup|lean|33",
+        "previousId": "77817c29-9062-42df-835f-f29de2314426",
+        "nextId": "2bfb53d1-a1b3-4b36-ab93-f259cb04a2d8",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|careful|22",
+        "previousId": "69c137f1-2606-4726-84b0-94f259d9327f",
+        "nextId": "45f2b0de-8184-4304-a4cb-4a628e2cff3f",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|release-brief|careful|33",
+        "previousId": "2cf106da-4748-4ae5-a38c-14b217d33e3b",
+        "nextId": "4c6f154f-5f41-471f-89cd-5703f83b8eeb",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|shipping-function|lean|22",
+        "previousId": "c77d218c-2b84-4b2f-b8e0-2ce3b72ea467",
+        "nextId": "524db082-3d6a-455f-bd02-a5a8c3fe5d3a",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|shipping-function|careful|33",
+        "previousId": "1bddf0e7-916a-48a6-8e7c-d15d431c1f1e",
+        "nextId": "52d9d3eb-8efd-4457-931d-d9f90432d8fb",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|shipping-function|lean|33",
+        "previousId": "67afcdf3-3d7f-450e-a94c-2be6c9c37ef9",
+        "nextId": "602e61f6-e8b2-447c-9ec3-43887087267d",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|careful|33",
+        "previousId": "6060a8ab-3c75-4a06-8323-445f05b86fcb",
+        "nextId": "60b8459c-2e7f-4c30-87ef-281acb998a33",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|release-brief|careful|33",
+        "previousId": "83e6e115-45bc-4d58-9208-4d4b84d79a99",
+        "nextId": "6f7c7816-f520-4f0c-8146-deaea4bb4fb4",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|release-brief|careful|33",
+        "previousId": "8cccc60b-2b7f-40d9-902b-ea6a0111f097",
+        "nextId": "79084ea4-014e-4187-b079-29dae967db9d",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|invoice-cleanup|lean|33",
+        "previousId": "6ea6e24b-36cd-4995-9bb5-d61b84234e61",
+        "nextId": "8470ae69-a103-46ec-bc9c-72ef07a57af8",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|shipping-function|careful|22",
+        "previousId": "5423950b-2561-46dc-856b-df558d5246f1",
+        "nextId": "8c4edf4f-4754-4575-85da-313720bd7859",
+        "previousProviderCalls": 2,
+        "reason": "explicit_secondary_recovery"
+      },
+      {
+        "cell": "super|shipping-function|lean|33",
+        "previousId": "d46d806c-5768-4ade-a717-045be30af397",
+        "nextId": "993a30f8-840d-46c5-b43c-c900639a2963",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|invoice-cleanup|careful|33",
+        "previousId": "a20c9863-ab2d-4242-8e58-be38f3505f56",
+        "nextId": "aa7058c5-afb7-4095-b7d2-7b16389e4c05",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|lean|22",
+        "previousId": "bf7184a4-5568-4bf9-8eda-8d8041bbca47",
+        "nextId": "b56b13fb-9f77-4ed2-9057-a1c2aa1ecd54",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|release-brief|lean|33",
+        "previousId": "ecc8280b-eb85-4fad-b2b5-9e5b3b802980",
+        "nextId": "c3dba01b-2b49-45df-ba1e-9906065129f6",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|shipping-function|lean|22",
+        "previousId": "5832d28b-8d23-4689-8e3e-e59a7cd4e83d",
+        "nextId": "c3f6a840-a41e-4f29-bf1c-add426a4a9a7",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|shipping-function|careful|22",
+        "previousId": "250de429-a1f9-4fd9-89ef-90c41cb6effe",
+        "nextId": "c490326f-a4f5-4fb5-8e46-6ee5fddbd828",
+        "previousProviderCalls": 3,
+        "reason": "explicit_secondary_recovery"
+      },
+      {
+        "cell": "lightning|release-brief|lean|33",
+        "previousId": "3323cde1-c2b2-4783-9009-79b9b81fb4f7",
+        "nextId": "d4525ea7-2d4c-4607-b442-a37a8c48793a",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|invoice-cleanup|lean|33",
+        "previousId": "c7593429-8eed-405f-afc8-09d51d9eff2e",
+        "nextId": "eda93ecf-1f9c-430f-a762-1c7f230f195a",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      }
+    ],
+    "analysis": "infrastructure_recovery_secondary"
+  },
+  "tiers": [
+    "lightning",
+    "super",
+    "ultra"
+  ],
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "profiles": [
+    "careful",
+    "lean"
+  ],
+  "tasks": [
+    "invoice-cleanup",
+    "release-brief",
+    "shipping-function"
+  ],
+  "byTier": {
+    "lightning": {
+      "model": "nvidia/Nemotron-3_5-Lightning",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "durationMs": {
+        "mean": 46591.11111111111,
+        "sd": 48673.20505635021
+      },
+      "tokens": {
+        "mean": 16256.470588235294
+      },
+      "costUSD": {
+        "mean": 0.0028435235294117646,
+        "known": false,
+        "knownRuns": 17,
+        "totalRuns": 18
+      },
+      "errors": [
+        "incomplete_response",
+        "step_limit",
+        "step_limit",
+        "run_timeout"
+      ]
+    },
+    "super": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "durationMs": {
+        "mean": 19439,
+        "sd": 22065.99615858274
+      },
+      "tokens": {
+        "mean": 6758.833333333333
+      },
+      "costUSD": {
+        "mean": 0.0037417500000000003,
+        "known": true,
+        "knownRuns": 18,
+        "totalRuns": 18
+      },
+      "errors": [
+        "step_limit",
+        "step_limit"
+      ]
+    },
+    "ultra": {
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "runs": 18,
+      "passRate": {
+        "mean": 0.7777777777777778,
+        "sd": 0.09622504486493767
+      },
+      "durationMs": {
+        "mean": 7183.333333333333,
+        "sd": 4668.869935068681
+      },
+      "tokens": {
+        "mean": 3556.6666666666665
+      },
+      "costUSD": {
+        "mean": 0.006115666666666666,
+        "known": true,
+        "knownRuns": 18,
+        "totalRuns": 18
+      },
+      "errors": []
+    }
+  },
+  "policies": {
+    "ladder": {
+      "passRate": {
+        "mean": 0.888888888888889,
+        "sd": 0.0962250448649376
+      },
+      "costUSD": 0.004134211764705882,
+      "costCoverage": {
+        "knownCells": 17,
+        "totalCells": 18,
+        "complete": false
+      },
+      "durationMs": 55051.27777777778
+    },
+    "always_ultra": {
+      "passRate": {
+        "mean": 0.7777777777777778,
+        "sd": 0.09622504486493767
+      },
+      "costUSD": 0.006115666666666667,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
+      "durationMs": 7183.333333333333
+    },
+    "always_super": {
+      "passRate": {
+        "mean": 0.6666666666666666,
+        "sd": 0.16666666666666669
+      },
+      "costUSD": 0.00374175,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
+      "durationMs": 19439
+    }
+  },
+  "pairedCostComparisons": {
+    "ladder_vs_always_ultra": {
+      "knownPairs": 17,
+      "totalCells": 18,
+      "ladderMeanUSD": 0.004134211764705882,
+      "controlMeanUSD": 0.0059604705882352945,
+      "deltaMeanUSD": -0.001826258823529412,
+      "relativeSaving": 0.3063950734249171,
+      "excludedCells": [
+        {
+          "seed": 11,
+          "task": "shipping-function",
+          "profile": "careful"
+        }
+      ]
+    },
+    "ladder_vs_always_super": {
+      "knownPairs": 17,
+      "totalCells": 18,
+      "ladderMeanUSD": 0.004134211764705882,
+      "controlMeanUSD": 0.003045423529411765,
+      "deltaMeanUSD": 0.0010887882352941173,
+      "relativeSaving": -0.3575161959507225,
+      "excludedCells": [
+        {
+          "seed": 11,
+          "task": "shipping-function",
+          "profile": "careful"
+        }
+      ]
+    }
+  },
+  "cells": [
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 22,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    },
+    {
+      "seed": 33,
+      "task": "shipping-function",
+      "profile": "lean",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ]
+    }
+  ]
+}

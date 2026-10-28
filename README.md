@@ -20,6 +20,11 @@ Run real agent tasks on NVIDIA Nemotron through **Nebius Token Factory**, let de
 
 ## Why
 
+**Nebius × NVIDIA Global AI Hackathon entry.** Devpost confirmed submission
+**1269138, BenchClaw Studio**, on 28 October 2026. This is a submission receipt,
+not a judging result. The existing entry remains editable until 30 October,
+10:00 PDT (18:00 Madrid); updates preserve that entry.
+
 Teams wiring an LLM agent into a real workflow face the same question again and again: **which model is good enough for this job?** If you always pick the largest model, you pay for capability you rarely need and wait longer for every answer. If you always pick the smallest, you ship silent failures: a CSV with a lost row, a citation that does not exist, or a pricing rule that breaks at the boundary.
 
 A fluent answer does not show which of the two happened. BenchClaw Studio does.
@@ -34,34 +39,35 @@ A fluent answer does not show which of the two happened. BenchClaw Studio does.
 <!-- RESULTS:START -->
 ## Results
 
-**108 live runs on Nebius Token Factory, about $0.43 in total.** There were two pre-registered experiments: 3 tasks × 2 agent profiles × 3 seeds × 3 Nemotron tiers each, temperature 0, and every pass or fail decided by deterministic checks. Values are means over seeds ± sample SD. Every run, failures included, is in [`experiments/`](experiments) and in the [live replay demo](https://agnuxo1.github.io/benchclaw-studio/#evidence).
+**110 live provider-attempted benchmark runs; 108 rows in the primary E01/E02 grids.** The two pre-registered experiments each use 3 tasks × 2 profiles × 3 seeds × 3 Nemotron tiers, at temperature 0. The inputs are controlled synthetic fixtures; the calls and receipts are real. Recorded-token cost is **$0.4317 for 109 attempts with known usage**; one timed-out attempt has unknown usage, so this is not a complete billed total.
 
-<img src="docs/media/policy.gif" alt="Routing policies on the E02 grid: auto-tier ladder $0.0041 per task with 89% passed; always Super $0.0037 with 67%; always Ultra $0.0061 with 78%" width="860">
+The independent reanalysis preserves the first provider attempt in every cell. Two previously replaced ledger-error runs had actually called the provider. They are now retained in the primary analysis; the recovery result remains visible below. [What changed and why](docs/RESULTS_CORRECTION_20261028.md).
 
-| Policy (E02, product settings) | Tasks passed | Cost per task | Mean time per task |
-| --- | --- | --- | --- |
-| **Auto-tier ladder** (Lightning → Super → Ultra) | **88.9% ± 9.6** | **$0.0041** | 55.1 s |
-| Always Nemotron 3 Ultra | 77.8% ± 9.6 | $0.0061 | 7.2 s |
-| Always Nemotron 3 Super | 66.7% ± 16.7 | $0.0037 | 19.4 s |
+<img src="docs/media/policy.gif" alt="Primary E02: ladder passes 83% vs Ultra 78%, with 32.15% lower cost on the same 17 known-cost cells" width="860">
 
-- **The ladder passes more tasks than always using the largest model, and costs 33% less.** Super and Ultra fail on *different* tasks: Super's release brief sometimes does not validate, and Ultra sometimes skips a required citation. Escalating on failed checks gets the best of each. The ladder settled 12 of 18 task cells on the cheapest tier.
-- **Reasoning models need room to answer.** With a 2,048-token output budget (E01), Nemotron 3.5 Lightning ran out of tokens while still thinking in 17 of 18 runs. At 8,192 tokens (E02), its pass rate rose from 6% to 67%. Following the pre-registered rule, 8,192 is now the Studio default.
-- **Ultra is the fastest tier on Token Factory.** It averaged 7.2 s per task, needed the fewest turns and tokens, and served the most tokens per second. The ladder trades latency for cost. For latency-critical work, start at Ultra; Studio lets you choose either.
+| Policy (E02 primary) | Tasks passed (all 18 cells) | Cost/task (same 17 cells) | Mean time/task (all 18) |
+|---|---|---|---|
+| **Auto-tier ladder** | **15/18 = 83.3%** | **$0.004044** | 54.1 s |
+| Always Nemotron 3 Ultra | 14/18 = 77.8% | $0.005960 | 7.2 s |
+| Always Nemotron 3 Super | 12/18 = 66.7% | $0.002196 | 15.3 s |
 
-<img src="docs/media/budget.gif" alt="Tasks passed per tier at 2,048 vs 8,192 output tokens: Lightning 6% to 67%, Super 67% to 67%, Ultra 67% to 78%" width="860">
+- **The positive routing result survives the correction.** The ladder passes one more grid cell than always-Ultra and costs **32.15% less on matched cells**. It is slower and costs more than always-Super; the table preserves both trade-offs.
+- **Reasoning models need room to answer.** Lightning rises from 1/18 (5.6%) at 2,048 output tokens to **11/18 (61.1%)** in the first-attempt 8,192-token grid. The explicit recovery analysis reaches 12/18 (66.7%). The larger budget remains the product default under the preregistered rule.
+- **Ultra remains the fastest tier measured.** It averages 7.2 s per task. The ladder trades latency for greater success on these fixtures and lower matched cost than Ultra.
 
-<img src="docs/media/tiers.gif" alt="E02 per tier: tasks passed 67%, 67%, 78%; mean run time 46.6 s, 19.4 s, 7.2 s; cost per run $0.0028, $0.0037, $0.0061" width="900">
+| E02 analysis | Ladder passes | Ultra passes | Matched cost saving |
+|---|---:|---:|---:|
+| **Primary, first attempt retained** | **15/18** | 14/18 | **32.15%** (17 paired cells) |
+| Secondary infrastructure recovery | **16/18** | 14/18 | **30.64%** (17 paired cells) |
 
-| Hypothesis (pre-registered) | Outcome |
-| --- | --- |
-| H1 · E01: ladder ≥ always-Ultra − 5 pts and cheaper | **Accepted**: 83.3% vs 66.7%, $0.0051 vs $0.0078 |
-| H2 · E01: latency Lightning < Super < Ultra | **Rejected**: Ultra was fastest (6.1 s vs 14.0 s vs 17.9 s) |
-| H3 · E01: pass rate Ultra ≥ Super ≥ Lightning | **Accepted**: 66.7% = 66.7% > 5.6% |
-| H4 · E02: Lightning recovers with 8,192 output tokens | **Accepted**: 5.6% → 66.7%; truncations 17/18 → 1/18 |
-| H5 · E02: ladder ≥ always-Ultra − 5 pts and cheaper | **Accepted**: 88.9% vs 77.8%, $0.0041 vs $0.0061 |
-| H6 · E02: no regression for Super and Ultra | **Accepted** |
+Both analyses remain public. An error code alone no longer classifies a run as unexecuted; only a ledger-stopped row with **zero provider calls** can be replaced automatically. Offline routing now obeys the same budget-stop rules as the live ladder. Unknown costs are disclosed and never treated as zero.
 
-Full tables, failure analysis and the deviation note are in [`experiments/LOG.md`](experiments/LOG.md).
+<img src="docs/media/budget.gif" alt="Lightning passes 6% at 2048 tokens and 61% in the corrected 8192-token primary grid" width="860">
+<img src="docs/media/tiers.gif" alt="Primary tier metrics from recorded provider attempts; per-tier available-cost counts are disclosed in JSON" width="900">
+
+E01's positive routing result and rejected latency ordering remain unchanged. In primary E02, the budget-recovery and no-regression rules still hold. Seed SD is available in the JSON; it is not a confidence interval over future tasks. Three fixture tasks do not establish a general model ranking.
+
+[Primary results](experiments/E02/summary-primary-corrected.json) · [Recovery results](experiments/E02/summary-recovery-explicit.json) · [All-attempt accounting](experiments/history-audit-20261028.json) · [Full log](experiments/LOG.md)
 <!-- RESULTS:END -->
 
 ## How NVIDIA Nemotron and Nebius Token Factory are used
@@ -121,9 +127,9 @@ STUDIO_MAX_RUNS=30
 ```sh
 NEBIUS_API_KEY=... node scripts/bench-tiers.mjs --out experiments/E01 --max-tokens 2048   # E01
 NEBIUS_API_KEY=... node scripts/bench-tiers.mjs --out experiments/E02 --max-tokens 8192   # E02 (product default)
-node scripts/summarize.mjs --runs experiments/E02/runs,experiments/E02b/runs --out experiments/E02/summary-combined.json
-node scripts/publish-showcase.mjs experiments/E02 --summary experiments/E02/summary-combined.json --runs experiments/E02/runs,experiments/E02b/runs
-python scripts/media/make_gifs.py --summary experiments/E02/summary-combined.json
+node scripts/summarize.mjs --runs experiments/E02/runs,experiments/E02b/runs --out experiments/E02/summary-primary-corrected.json
+node scripts/publish-showcase.mjs experiments/E02 --summary experiments/E02/summary-primary-corrected.json --runs experiments/E02/runs,experiments/E02b/runs
+python scripts/media/make_gifs.py --summary experiments/E02/summary-primary-corrected.json
 ```
 
 Each experiment's hypotheses, decision rules and stopping rule were written in [`experiments/LOG.md`](experiments/LOG.md) and committed **before** its first live call. The hashes are in `experiments/LOG.preregistration.sha256`. Every run is stored in `experiments/E0x/runs/` and summarised in `results.csv`, failures included. A smoke test (`scripts/smoke-tiers.mjs`) makes one JSON-mode call per tier to confirm the model ids before any benchmark.
@@ -158,7 +164,7 @@ tests/       node:test suite (offline, scripted providers only)
 
 [![BenchClaw Studio demo video (2:40)](https://i.ytimg.com/vi/gVSO4OD6mh8/hqdefault.jpg)](https://youtu.be/gVSO4OD6mh8)
 
-**[Watch on YouTube (2:40)](https://youtu.be/gVSO4OD6mh8)**: the problem, a live auto-tier ladder run on Token Factory, the E01/E02 metrics and the architecture.
+The video predates the 28 October accounting correction; the Results section and replay show the updated primary analysis. **[Watch on YouTube (2:40)](https://youtu.be/gVSO4OD6mh8)**: the problem, a live auto-tier ladder run on Token Factory, the E01/E02 metrics and the architecture.
 
 ## Limitations
 
@@ -166,7 +172,7 @@ These are the boundaries of the current version, documented as they would be in 
 
 - Three fixture tasks are evidence about **those tasks**. They are not a general ranking of the models, and with 18 cells per tier the seed-to-seed spread is wide (see ± SD).
 - The ladder saves cost at the expense of latency, because a task that escalates pays for every tier it tries.
-- In E02, a Lightning run hit the 180 s run timeout during a call. Its usage could not be reconciled, so the token ledger stopped the experiment, as designed. The 24 cells that never reached the model were completed with identical settings (E02b), as documented in the log.
+- In E02, a Lightning run hit the 180 s run timeout during a call. Its usage could not be reconciled, so the token ledger stopped the experiment, as designed. Twenty-two cells had no provider call; two additional cells had provider attempts and were rerun in E02b. The primary analysis preserves those first attempts; recovery is secondary, as documented in the correction.
 - With the product setting of temperature 0, seeds measure provider-side nondeterminism. Sampling variety would need a separate experiment.
 - Cost is computed from reported tokens × published price. It is an estimate, not an invoice.
 - The replay demo is read-only. Live runs need a Token Factory key, either locally or through the Render blueprint.

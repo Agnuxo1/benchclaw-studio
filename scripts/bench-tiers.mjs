@@ -14,7 +14,7 @@ import {TokenBudget} from '../server/token-budget.mjs';
 import {TASKS} from '../server/tasks.mjs';
 import {makeRun,executeRun,PROFILES} from '../server/engine.mjs';
 import {MODELS,LADDER} from '../server/models.mjs';
-import {summarize,mergeRuns,NOT_EXECUTED} from './summarize.mjs';
+import {summarize,mergeRuns,isNotExecuted} from './summarize.mjs';
 const arg=(name,fallback)=>{const i=process.argv.indexOf('--'+name);return i>0?process.argv[i+1]:fallback;};
 const out=arg('out','experiments/E01'),tiers=arg('tiers',LADDER.join(',')).split(','),seeds=arg('seeds','11,22,33').split(',').map(Number);
 const profiles=arg('profiles',Object.keys(PROFILES).join(',')).split(','),tasks=arg('tasks',TASKS.map(t=>t.id).join(',')).split(',');
@@ -37,7 +37,7 @@ const client=new NebiusClient(()=>vault.resolve('nebius_api','https://api.tokenf
 const csv=join(out,'results.csv');
 if(!existsSync(csv))await writeFile(csv,'id,date,hypothesis,tier,model,task,profile,seed,status,checks,durationMs,tokens,cost_usd,calls,error,commit\n');
 // --complete <runs dir>: only the cells whose recorded run was stopped by the token ledger before reaching the model.
-const complete=arg('complete',null),pending=complete?new Set(mergeRuns([complete]).filter(r=>NOT_EXECUTED.has(r.error)).map(r=>[r.tier,r.taskId,r.profile,r.inference.seed].join('|'))):null;
+const complete=arg('complete',null),pending=complete?new Set(mergeRuns([complete]).filter(isNotExecuted).map(r=>[r.tier,r.taskId,r.profile,r.inference.seed].join('|'))):null;
 const jobs=[];for(const seed of seeds)for(const task of tasks)for(const profile of profiles)for(const tier of tiers)if(!pending||pending.has([tier,task,profile,seed].join('|')))jobs.push({seed,task,profile,tier});
 console.log(`${jobs.length} runs`);
 const results=[];let next=0;

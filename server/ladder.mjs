@@ -31,6 +31,6 @@ export async function executeLadder(ladder,client,{signal,register=()=>{},persis
 // Offline policy evaluation over a full tier grid: which tier would the ladder pick, and what would it cost?
 export function evaluatePolicy(grid,tiers=LADDER){
  let cost=0,known=true,durationMs=0;const path=[];
- for(const tier of tiers){const r=grid[tier];if(!r)return {chosenTier:null,path,cost:null,durationMs:null,complete:false};path.push(tier);if(Number.isFinite(r.cost))cost+=r.cost;else known=false;durationMs+=r.durationMs||0;if(r.status==='passed')return {chosenTier:tier,path,cost:known?cost:null,durationMs,complete:true};}
+ for(const tier of tiers){const r=grid[tier];if(!r)return {chosenTier:null,path,cost:null,durationMs:null,complete:false};path.push(tier);if(Number.isFinite(r.cost))cost+=r.cost;else known=false;durationMs+=r.durationMs||0;if(r.status==='passed')return {chosenTier:tier,path,cost:known?cost:null,durationMs,complete:true};if(r.status==='cancelled'||HALT.has(r.error))return {chosenTier:null,path,cost:known?cost:null,durationMs,complete:true,halted:true};}
  return {chosenTier:null,path,cost:known?cost:null,durationMs,complete:true};
 }
