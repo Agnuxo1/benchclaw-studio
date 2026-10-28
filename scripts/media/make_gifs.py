@@ -107,7 +107,13 @@ def policy_bars(summary, out):
     pol = summary.get("policies") or {}
     if "ladder" not in pol:
         return
-    rows = [("Always Ultra", pol["always_ultra"]), ("Always Super", pol["always_super"]), ("Auto-tier ladder", pol["ladder"])]
+    rows = [("Always Ultra", dict(pol["always_ultra"])), ("Always Super", dict(pol["always_super"])), ("Auto-tier ladder", dict(pol["ladder"]))]
+    paired = summary.get('pairedCostComparisons', {})
+    if 'ladder_vs_always_ultra' in paired:
+        rows[0][1]['costUSD'] = paired['ladder_vs_always_ultra']['controlMeanUSD']
+        rows[2][1]['costUSD'] = paired['ladder_vs_always_ultra']['ladderMeanUSD']
+    if 'ladder_vs_always_super' in paired:
+        rows[1][1]['costUSD'] = paired['ladder_vs_always_super']['controlMeanUSD']
     fig, ax = plt.subplots(figsize=(10, 3.6), dpi=100, facecolor=BG)
     fig.subplots_adjust(left=0.17, right=0.98)
     frames = 26
@@ -122,7 +128,10 @@ def policy_bars(summary, out):
             ax.barh(k, c * f, color=[MUTED, "#4f7f12", GREEN][k], height=0.55)
             ax.text(c * f + maxc * 0.01, k, f"${c * f:.4f} per task · {100 * p['passRate']['mean']:.0f}% passed", va="center", fontsize=10.5, color=INK)
         ax.set_yticks(range(3)); ax.set_yticklabels([r[0] for r in rows], fontsize=11); ax.set_xticks([]); ax.set_xlim(0, maxc * 1.6)
-        ax.set_title("Routing policy on the same recorded grid: cost per task and success", fontsize=12, color=INK, loc="left")
+        coverage = paired.get('ladder_vs_always_ultra')
+        title = (f"Matched cost: {coverage['knownPairs']}/{coverage['totalCells']} cells; success: all {coverage['totalCells']} cells"
+                 if coverage else 'Routing policy on the same recorded grid: cost per task and success')
+        ax.set_title(title, fontsize=12, color=INK, loc="left")
 
     anim = FuncAnimation(fig, draw, frames=frames, interval=80)
     anim.save(out / "policy.gif", writer=PillowWriter(fps=12))
