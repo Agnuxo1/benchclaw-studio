@@ -12,7 +12,7 @@ Run real agent tasks on NVIDIA Nemotron through **Nebius Token Factory**, let de
 ![NVIDIA Nemotron](https://img.shields.io/badge/NVIDIA-Nemotron%203%20%7C%203.5-76b900.svg)
 ![Nebius Token Factory](https://img.shields.io/badge/Nebius-Token%20Factory-0d1b2a.svg)
 
-**[Live replay demo](https://agnuxo1.github.io/benchclaw-studio/)** · **[Demo video](https://youtu.be/gVSO4OD6mh8)** · **[Results](#results)** · **[Quick start](#quick-start)**
+**[Live replay demo](https://agnuxo1.github.io/benchclaw-studio/)** · **[Demo video](https://youtu.be/LpHwFtMeQzY)** · **[Results](#results)** · **[Quick start](#quick-start)**
 
 <img src="docs/media/architecture.gif" alt="Auto-tier ladder: the Studio API sends a task to Nemotron 3.5 Lightning; its checks fail, so it escalates to Nemotron 3 Super, which passes; Ultra is never called" width="900">
 
@@ -187,9 +187,9 @@ tests/       node:test suite (offline, scripted providers only)
 
 ## Demo video
 
-[![BenchClaw Studio demo video (2:40)](https://i.ytimg.com/vi/gVSO4OD6mh8/hqdefault.jpg)](https://youtu.be/gVSO4OD6mh8)
+[![BenchClaw Studio demo video (2:53)](https://i.ytimg.com/vi/LpHwFtMeQzY/hqdefault.jpg)](https://youtu.be/LpHwFtMeQzY)
 
-**[Watch on YouTube (2:40)](https://youtu.be/gVSO4OD6mh8)**: the problem, a live auto-tier ladder run on Token Factory, the measured results and the architecture.
+**[Watch on YouTube (2:53)](https://youtu.be/LpHwFtMeQzY)**: the problem, a live auto-tier ladder run on Token Factory, the measured results of all four experiments and the architecture. It replaces the first video of 28 October, whose E02 figures were later corrected (see Results).
 
 ## Limitations
 
