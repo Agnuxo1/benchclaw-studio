@@ -175,3 +175,32 @@ JEV chose to run E04 now (provenance=jev; 0.14, settled in its favour by the rem
 - E01–E03 are not modified, and E04 does not replace their results. Each experiment is reported under its own conditions.
 
 **Stopping rules and budget.** Spend in this phase before E04: at most $0.056. Part A runs with `--usd-cap 0.40` and Part B with `--usd-cap 0.25`, so the phase total stays at or below $0.71, under the $1.00 budget. If any runs are stopped by their own ledger, the cells without an executed run get a single completion pass (`--complete`, the same settings, the cap minus what was spent), as in E03b. Any cells still missing are reported, and the hypotheses are judged on complete cells only.
+
+### Erratum: E02 cost per task, and the E03 cost figures (found 2026-10-28 while implementing cost bounds, before any E04 call)
+
+**What was wrong.** `scripts/summarize.mjs` averaged a policy's cost only over the cells whose cost was known, while it counted every cell for pass rate and time. In E02, one ladder cell has an unknown cost: Lightning `shipping-function`, careful, seed 11, which ran 12 calls and was cut at the 180 s run limit, so its last call returned no usage. That cell paid for Lightning, then Super, then Ultra, and it was left out of the cost mean. E01 is not affected, because all 18 of its cells have known costs.
+
+**Corrected E02 figures** (all 18 cells). Unknown usage is counted as $0 at the low bound, and as 40,000 prompt tokens plus the full output budget at the high bound:
+
+| Policy, E02 | Pass rate | Cost per task, published | Cost per task, corrected (low – high) |
+| --- | --- | --- | --- |
+| Auto-tier ladder | 0.889 ± 0.096 | $0.00413 (17 cells) | **$0.00586 – $0.00611** |
+| Always-Ultra | 0.778 ± 0.096 | $0.00612 | $0.00612 |
+| Always-Super | 0.667 ± 0.167 | $0.00374 | $0.00374 |
+
+- **H5 still holds.** Even the high bound is below always-Ultra ($0.00611 < $0.00612), and the pass rate is unchanged.
+- **The published "33% lower cost" for E02 is wrong.** The corrected saving against always-Ultra is 0.2% to 4.2%. In E02 the ladder therefore passed 11 points more tasks than always-Ultra at about the same cost. The −33% figure only holds for E01, which used 2,048 tokens: $0.00513 against $0.00780, −34%, all cells known.
+- **Where the wrong figure appears.** The 33% figure and $0.0041 appear in the README, docs/SUBMISSION.md, the Devpost text, the demo gallery, `docs/media/policy.gif` and the submitted video, in both the narration and the chart. The correction is planned in the final update, and none of them is left as published.
+
+**E03 figures corrected the same way** (4 complete cells): ladder $0.00347 – $0.00565, speculative $0.00430 – $0.00648, always-Ultra $0.00589. The earlier E03 table averaged the ladder and speculative costs over only 2 known cells. Under its pre-registered "mean cost", E03's criterion (c) is therefore undetermined rather than met. **H7 stays rejected**, on criterion (b).
+
+`scripts/summarize.mjs` now reports `costKnownCells`, `costUSDLow` and `costUSDHigh` for every policy. The old `costUSD`, the mean over known cells, is kept for reference only.
+
+### E04 amendments after an independent review by Codex (written 2026-10-28, before any E04 call)
+
+Codex (`codex exec`, gpt-6-sol, read-only) asked for four corrections before any call. All four are applied, together with one clarification:
+1. **Cost decisions use bounds.** Criterion (c) of H9, H9-live and H10 compares the tested policy's **high** cost bound with the control's **low** bound. Unknown costs therefore always count against the hypothesis.
+2. **Tier memory needs a real history.** H10 is evaluated only on task-and-profile sequences whose earlier seeds are all complete. A missing seed ends that sequence for tier memory.
+3. **The USD stop is strict per call.** Before each provider call, the stop checks the spend so far, plus the worst case of every call in flight, plus this call's worst case (prompt bytes counted as tokens, plus the full output budget, at the tier's price) against the cap. Afterwards the call is charged its reported cost, or its worst case when no usage came back.
+4. **Real cancellation is tested.** A call cut at the run limit is reported as `run_timeout`. Behaviour change, stated plainly: a single provider call can now occupy a run for up to the run's 180 s limit, which a whole run could already do.
+5. **Clarification on timing and conditions.** H9-live compares live measurements with Part A controls measured at a different time. Per-tier median throughput is reported for both parts. If Lightning's or Super's median throughput in Part B differs from Part A by more than a factor of 2, H9-live is reported as confounded and the speculative ladder's product rule is not met. H9 and H10 are new tests under adjusted operating conditions, not independent confirmations of E03.

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T14:51:12.131Z",
+  "generatedAt": "2026-10-28T15:05:55.316Z",
   "sources": [
     "experiments/E03/runs",
     "experiments/E03b/runs"
@@ -44,6 +44,7 @@
         "mean": 0.0017276099999999996,
         "known": false
       },
+      "throughputTokS": 75.44192733221556,
       "errors": [
         "provider_timeout",
         "provider_timeout"
@@ -67,6 +68,7 @@
         "mean": 0.00199344,
         "known": true
       },
+      "throughputTokS": 84.48844884488449,
       "errors": []
     },
     "ultra": {
@@ -87,6 +89,7 @@
         "mean": 0.005441400000000001,
         "known": true
       },
+      "throughputTokS": 137.3134328358209,
       "errors": []
     }
   },
@@ -97,6 +100,9 @@
         "sd": null
       },
       "costUSD": 0.0017276099999999996,
+      "costKnownCells": 2,
+      "costUSDLow": 0.00346893,
+      "costUSDHigh": 0.00565197,
       "durationMs": 64421.25,
       "durationMsMedian": 66046.5,
       "durationMsMax": 84371,
@@ -108,6 +114,9 @@
         "sd": null
       },
       "costUSD": 0.0058885,
+      "costKnownCells": 4,
+      "costUSDLow": 0.0058885,
+      "costUSDHigh": 0.0058885,
       "durationMs": 5966.75,
       "durationMsMedian": 5260.5,
       "durationMsMax": 9879,
@@ -119,6 +128,9 @@
         "sd": null
       },
       "costUSD": 0.0020853750000000004,
+      "costKnownCells": 4,
+      "costUSDLow": 0.0020853750000000004,
+      "costUSDHigh": 0.0020853750000000004,
       "durationMs": 11774.25,
       "durationMsMedian": 12134.5,
       "durationMsMax": 13892,
@@ -130,6 +142,9 @@
         "sd": null
       },
       "costUSD": 0.00338016,
+      "costKnownCells": 2,
+      "costUSDLow": 0.004295205,
+      "costUSDHigh": 0.006478245,
       "durationMs": 30759,
       "durationMsMedian": 27556.5,
       "durationMsMax": 58987,
@@ -141,6 +156,9 @@
         "sd": null
       },
       "costUSD": 0.0017276099999999996,
+      "costKnownCells": 2,
+      "costUSDLow": 0.00346893,
+      "costUSDHigh": 0.00565197,
       "durationMs": 64421.25,
       "durationMsMedian": 66046.5,
       "durationMsMax": 84371,
