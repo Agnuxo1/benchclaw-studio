@@ -30,7 +30,7 @@ Both local source trees and public GitHub files were inspected. BenchClaw contai
 | No equivalent local run comparison in inspected clients | Task/input/validator/runtime/permissions equivalence manifest, history and export |
 | Existing independent project branding | Original accessible Studio UI and responsive states |
 
-These Studio features are being created on 2026-09-30, after the window opened. Existing EnigmAgent v3 work occurred during the contest window but was already present before this Studio request; it is reused and credited, not described as newly created for Studio. Git history and a final commit/tag must substantiate the submitted version; no submission tag is claimed yet.
+These Studio features are being created on 2026-09-30, after the window opened. Existing EnigmAgent v3 work occurred during the contest window but was already present before this Studio request; it is reused and credited, not described as newly created for Studio. Git history substantiates the submitted version: the tag `submitted-20261028` marks the commit submitted on Devpost on 2026-10-28 (1e294b9). Later commits on `main` are documented updates made before the edit deadline, recorded in `experiments/LOG.md`.
 
 ## Model and resources
 

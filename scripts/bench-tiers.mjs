@@ -15,7 +15,7 @@ import {TokenBudget} from '../server/token-budget.mjs';
 import {TASKS} from '../server/tasks.mjs';
 import {makeRun,executeRun,PROFILES} from '../server/engine.mjs';
 import {MODELS,LADDER,tierOf,callCost} from '../server/models.mjs';
-import {summarize,mergeRuns,NOT_EXECUTED,summarizeLadders} from './summarize.mjs';
+import {summarize,mergeRuns,isNotExecuted,summarizeLadders} from './summarize.mjs';
 import {makeLadder,executeSpeculativeLadder} from '../server/ladder.mjs';
 const arg=(name,fallback)=>{const i=process.argv.indexOf('--'+name);return i>0?process.argv[i+1]:fallback;};
 const out=arg('out','experiments/E01'),tiers=arg('tiers',LADDER.join(',')).split(','),seeds=arg('seeds','11,22,33').split(',').map(Number);
@@ -82,7 +82,7 @@ if(policy){
    await appendFile(lcsv,[ladder.id,ladder.createdAt,hypothesis,policy,c.task,c.profile,c.seed,ladder.status,ladder.chosenTier??'',ladder.decisionMs,ladder.durationMs,ladder.cost??'',ladder.steps.map(st=>`${st.tier}:${st.status}:${st.error??''}:${st.durationMs}`).join(' '),commit].join(',')+'\n');
    console.log(`${c.task.padEnd(16)} ${c.profile.padEnd(8)} seed=${c.seed} ${ladder.status.padEnd(10)} ${String(ladder.chosenTier).padEnd(9)} answer=${(ladder.decisionMs/1000).toFixed(1)}s settled=${(ladder.durationMs/1000).toFixed(1)}s ${ladder.steps.map(st=>st.tier[0]+':'+(st.error||st.status)).join(' ')}`);
   }else{
-   const grid={};for(const st of c.ladder.steps){const r=priorRuns.get(st.runId);if(r&&!NOT_EXECUTED.has(r.error)&&r.status!=='cancelled')grid[st.tier]=r;}
+   const grid={};for(const st of c.ladder.steps){const r=priorRuns.get(st.runId);if(r&&!isNotExecuted(r)&&r.status!=='cancelled')grid[st.tier]=r;}
    const rerun=async tier=>{const r=makeRun(c.task,c.profile,allowed,'bench',MODELS[tier].id,{seed:c.seed,maxTokens});await executeRun(r,runClient(),{health:()=>broker.execute('synthetic_health')});await save(r);grid[tier]=r;};
    await Promise.all(LADDER.slice(0,2).filter(t=>!grid[t]).map(rerun));
    if(!LADDER.slice(0,2).some(t=>grid[t].status==='passed')&&!grid.ultra)await rerun('ultra');
@@ -97,9 +97,9 @@ if(policy){
 }
 const csv=join(out,'results.csv');
 if(!existsSync(csv))await writeFile(csv,'id,date,hypothesis,tier,model,task,profile,seed,status,checks,durationMs,tokens,cost_usd,calls,error,commit\n');
-// --complete <runs dir>: only the cells without a recorded run that reached the model: runs stopped by the token ledger, and cells
-// never started because the USD cap refused them (E03). Runs that reached the model are never repeated.
-const complete=arg('complete',null),executed=complete?new Set(mergeRuns([complete]).filter(r=>!NOT_EXECUTED.has(r.error)).map(r=>[r.tier,r.taskId,r.profile,r.inference.seed].join('|'))):null;
+// --complete <runs dir>: only the cells without a recorded run that reached the model: runs stopped by the token ledger before any
+// provider call, and cells never started because the USD cap refused them (E03). Runs that reached the model are never repeated.
+const complete=arg('complete',null),executed=complete?new Set(mergeRuns([complete]).filter(r=>!isNotExecuted(r)).map(r=>[r.tier,r.taskId,r.profile,r.inference.seed].join('|'))):null;
 const jobs=[];for(const seed of seeds)for(const task of tasks)for(const profile of profiles)for(const tier of tiers)if(!executed||!executed.has([tier,task,profile,seed].join('|')))jobs.push({seed,task,profile,tier});
 console.log(`${jobs.length} runs`);
 const results=[];let next=0;

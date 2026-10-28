@@ -1,10 +1,16 @@
 {
-  "generatedAt": "2026-10-28T15:22:32.365Z",
+  "generatedAt": "2026-10-28T18:34:35.638Z",
   "sources": [
     "experiments/E01/runs"
   ],
   "maxTokens": 2048,
   "notExecuted": 0,
+  "mergeAudit": {
+    "historyRuns": 54,
+    "providerAttemptedRuns": 54,
+    "replacements": [],
+    "analysis": "first_provider_attempt_preserved"
+  },
   "tiers": [
     "lightning",
     "super",
@@ -42,6 +48,8 @@
       "costUSD": {
         "mean": 0.0007701033333333334,
         "known": true,
+        "knownRuns": 18,
+        "totalRuns": 18,
         "low": 0.0007701033333333334,
         "high": 0.0007701033333333334
       },
@@ -83,6 +91,8 @@
       "costUSD": {
         "mean": 0.0027226,
         "known": true,
+        "knownRuns": 18,
+        "totalRuns": 18,
         "low": 0.0027226,
         "high": 0.0027226
       },
@@ -108,6 +118,8 @@
       "costUSD": {
         "mean": 0.007799777777777779,
         "known": true,
+        "knownRuns": 18,
+        "totalRuns": 18,
         "low": 0.007799777777777779,
         "high": 0.007799777777777779
       },
@@ -126,7 +138,11 @@
         "sd": 0.16666666666666669
       },
       "costUSD": 0.005126792222222221,
-      "costKnownCells": 18,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
       "costUSDLow": 0.005126792222222221,
       "costUSDHigh": 0.005126792222222221,
       "durationMs": 32663.722222222223,
@@ -140,7 +156,11 @@
         "sd": 0.16666666666666669
       },
       "costUSD": 0.007799777777777779,
-      "costKnownCells": 18,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
       "costUSDLow": 0.007799777777777779,
       "costUSDHigh": 0.007799777777777779,
       "durationMs": 6122.5,
@@ -154,7 +174,11 @@
         "sd": 0.16666666666666669
       },
       "costUSD": 0.0027226,
-      "costKnownCells": 18,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
       "costUSDLow": 0.0027226,
       "costUSDHigh": 0.0027226,
       "durationMs": 14048.444444444445,
@@ -168,7 +192,11 @@
         "sd": 0.16666666666666669
       },
       "costUSD": 0.005238925555555555,
-      "costKnownCells": 18,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
       "costUSDLow": 0.005238925555555555,
       "costUSDHigh": 0.005238925555555555,
       "durationMs": 17379.5,
@@ -182,7 +210,11 @@
         "sd": 0.16666666666666669
       },
       "costUSD": 0.0045805755555555555,
-      "costKnownCells": 18,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
       "costUSDLow": 0.0045805755555555555,
       "costUSDHigh": 0.0045805755555555555,
       "durationMs": 22873.5,
@@ -196,7 +228,11 @@
         "sd": 0.16666666666666669
       },
       "costUSD": 0.005126792222222221,
-      "costKnownCells": 18,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
       "costUSDLow": 0.005126792222222221,
       "costUSDHigh": 0.005126792222222221,
       "durationMs": 32663.722222222223,
@@ -210,13 +246,37 @@
         "sd": 0.16666666666666669
       },
       "costUSD": 0.007799777777777779,
-      "costKnownCells": 18,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
       "costUSDLow": 0.007799777777777779,
       "costUSDHigh": 0.007799777777777779,
       "durationMs": 6122.5,
       "durationMsMedian": 4218.5,
       "durationMsMax": 25140,
       "cells": 18
+    }
+  },
+  "pairedCostComparisons": {
+    "ladder_vs_always_ultra": {
+      "knownPairs": 18,
+      "totalCells": 18,
+      "ladderMeanUSD": 0.005126792222222221,
+      "controlMeanUSD": 0.007799777777777779,
+      "deltaMeanUSD": -0.0026729855555555574,
+      "relativeSaving": 0.3427002193794697,
+      "excludedCells": []
+    },
+    "ladder_vs_always_super": {
+      "knownPairs": 18,
+      "totalCells": 18,
+      "ladderMeanUSD": 0.005126792222222221,
+      "controlMeanUSD": 0.0027226,
+      "deltaMeanUSD": 0.0024041922222222214,
+      "relativeSaving": -0.8830501073320434,
+      "excludedCells": []
     }
   },
   "cells": [

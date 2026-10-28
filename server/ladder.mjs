@@ -66,12 +66,15 @@ export function evaluateSpeculative(grid,tiers=LADDER){
  const passing=par.filter(t=>grid[t].status==='passed').sort((a,b)=>(grid[a].durationMs||0)-(grid[b].durationMs||0)||par.indexOf(a)-par.indexOf(b));
  if(passing.length)return {chosenTier:passing[0],path,cost:known?cost:null,durationMs:grid[passing[0]].durationMs||0,complete:true};
  let durationMs=Math.max(...par.map(t=>grid[t].durationMs||0));
- for(const tier of tiers.slice(2)){const r=grid[tier];if(!r)return {chosenTier:null,path,cost:null,durationMs:null,complete:false};path.push(tier);add(r);durationMs+=r.durationMs||0;if(r.status==='passed')return {chosenTier:tier,path,cost:known?cost:null,durationMs,complete:true};}
+ // Same halt rule as the live speculative ladder: a stopped parallel run, or a stopped later tier, ends the ladder.
+ const stopped=r=>r.status==='cancelled'||HALT.has(r.error);
+ if(par.some(t=>stopped(grid[t])))return {chosenTier:null,path,cost:known?cost:null,durationMs,complete:true,halted:true};
+ for(const tier of tiers.slice(2)){const r=grid[tier];if(!r)return {chosenTier:null,path,cost:null,durationMs:null,complete:false};path.push(tier);add(r);durationMs+=r.durationMs||0;if(r.status==='passed')return {chosenTier:tier,path,cost:known?cost:null,durationMs,complete:true};if(stopped(r))return {chosenTier:null,path,cost:known?cost:null,durationMs,complete:true,halted:true};}
  return {chosenTier:null,path,cost:known?cost:null,durationMs,complete:true};
 }
 // Offline policy evaluation over a full tier grid: which tier would the ladder pick, and what would it cost?
 export function evaluatePolicy(grid,tiers=LADDER){
  let cost=0,known=true,durationMs=0;const path=[];
- for(const tier of tiers){const r=grid[tier];if(!r)return {chosenTier:null,path,cost:null,durationMs:null,complete:false};path.push(tier);if(Number.isFinite(r.cost))cost+=r.cost;else known=false;durationMs+=r.durationMs||0;if(r.status==='passed')return {chosenTier:tier,path,cost:known?cost:null,durationMs,complete:true};}
+ for(const tier of tiers){const r=grid[tier];if(!r)return {chosenTier:null,path,cost:null,durationMs:null,complete:false};path.push(tier);if(Number.isFinite(r.cost))cost+=r.cost;else known=false;durationMs+=r.durationMs||0;if(r.status==='passed')return {chosenTier:tier,path,cost:known?cost:null,durationMs,complete:true};if(r.status==='cancelled'||HALT.has(r.error))return {chosenTier:null,path,cost:known?cost:null,durationMs,complete:true,halted:true};}
  return {chosenTier:null,path,cost:known?cost:null,durationMs,complete:true};
 }
