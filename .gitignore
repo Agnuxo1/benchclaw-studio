@@ -9,3 +9,10 @@ private/
 artifacts/
 clean-install/
 *.log
+.claude/
+coordinacion/
+CHECKPOINT.md
+PENDIENTE_FRAN.md
+scripts/init-coordination.py
+scripts/set-nebius-key.ps1
+experiments/*/token-ledger.json*
