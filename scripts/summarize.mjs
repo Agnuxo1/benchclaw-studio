@@ -38,6 +38,9 @@ export function summarize(results,{tiers,seeds,profiles,tasks,...meta}){
   pol('always_super',c=>({passed:c.super.status==='passed',cost:c.super.cost,durationMs:c.super.durationMs,path:['super']}));
   pol('speculative',c=>({passed:!!c.speculative.chosenTier,cost:c.speculative.cost,durationMs:c.speculative.durationMs,path:c.speculative.path}));
   pol('tier_memory',c=>({passed:!!c.memory.chosenTier,cost:c.memory.cost,durationMs:c.memory.durationMs,path:c.memory.path}),c=>c.memory);
+  // H10's controls on exactly the cells tier memory was evaluated on.
+  pol('ladder_on_memory_cells',c=>({passed:!!c.ladder.chosenTier,cost:c.ladder.cost,durationMs:c.ladder.durationMs,path:c.ladder.path}),c=>c.memory);
+  pol('always_ultra_on_memory_cells',c=>({passed:c.ultra.status==='passed',cost:c.ultra.cost,durationMs:c.ultra.durationMs,path:['ultra']}),c=>c.memory);
   summary.cells=cells.map(c=>({seed:c.seed,task:c.task,profile:c.profile,chosenTier:c.ladder.chosenTier,path:c.ladder.path,speculative:{chosenTier:c.speculative.chosenTier,path:c.speculative.path,durationMs:c.speculative.durationMs},memory:c.memory&&{startTier:c.memory.startTier,chosenTier:c.memory.chosenTier,path:c.memory.path}}));
  }
  return summary;

@@ -23,11 +23,12 @@ const profiles=arg('profiles',Object.keys(PROFILES).join(',')).split(','),tasks=
 const cap=Number(arg('token-cap','3000000')),concurrency=Number(arg('concurrency','3')),hypothesis=arg('hypothesis','H1'),maxTokens=Number(arg('max-tokens','8192'));
 if(tiers.some(t=>!MODELS[t])||seeds.some(s=>!Number.isSafeInteger(s)))throw new Error('Invalid tiers or seeds');
 // --usd-cap: strict monetary stop, checked before every provider call. A call starts only if the spend so far plus the worst case of
-// every call in flight (prompt bytes counted as prompt tokens, plus the full output budget, at the tier's price) stays under the cap.
+// every call in flight (prompt bytes plus the ledger's 4,096-token allowance as prompt tokens, plus the full output budget, at the
+// tier's price) stays under the cap.
 // The call is then charged its provider-reported cost, or its worst case when no usage came back; a call a ledger stopped before it
 // reached the provider costs nothing. A refused call fails with token_budget_exhausted, which stops its run or ladder.
 const usdCap=Number(arg('usd-cap','Infinity'));let spentUSD=Number(arg('spent-usd','0')),inflightUSD=0,capStops=0;
-const worstCallUSD=(messages,o)=>{const p=MODELS[tierOf(o.model)]?.price;return p?(Buffer.byteLength(JSON.stringify(messages),'utf8')*p.input+o.maxTokens*p.output)/1e6:Infinity;};
+const worstCallUSD=(messages,o)=>{const p=MODELS[tierOf(o.model)]?.price;return p?((Buffer.byteLength(JSON.stringify(messages),'utf8')+4096)*p.input+o.maxTokens*p.output)/1e6:Infinity;};
 const guarded=c=>({model:c.model,async complete(messages,o){
  const worst=worstCallUSD(messages,o);
  if(spentUSD+inflightUSD+worst>usdCap){capStops++;const e=new Error('token_budget_exhausted');e.code='token_budget_exhausted';throw e;}
