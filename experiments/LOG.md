@@ -119,3 +119,15 @@ The error code shown for blocked calls was misleading: `token_budget_overrun` ap
 - *Completion of Part A.* If the ledger stops the grid, the cells that never reached the model are completed with `--complete`, the same settings and a fresh ledger, exactly as E02b. Runs that were executed are never replaced.
 - *Completion of Part B.* If the ledger halts a live cell, its runs that reached the model are kept. The missing parallel runs, and Ultra if neither parallel run passed, run again individually with a fresh ledger, and the cell's answer time is composed with the offline rule. Composed cells are counted and reported separately, and the latency-model check uses measured cells only.
 - If a USD cap stops an invocation, the hypotheses are judged on complete cells only, and the missing cells are reported.
+
+### E03 stopping event and E03b completion (written 2026-10-28, before any E03b call)
+
+**What happened.** At 14:44:20 UTC a Lightning `release-brief` run (seed 11, careful profile) made a provider call that exceeded the 45 s per-call transport timeout (`provider_timeout`). The aborted call returned no usage, and the token ledger blocked every later admission (`provider_usage_unavailable`), as designed. 18 of the 54 runs were recorded: 7 reached the model (3 passed, 3 failed and the timed-out run, which counts as a real failure), and 11 were stopped by the ledger.
+
+**A fault in the new USD stop.** `--usd-cap` charged every run with an unknown cost the $0.035 reserve, including the 11 runs the ledger had stopped before any call. It therefore estimated $0.37 of spend and refused to start the remaining 36 jobs. The provider-reported spend of E03 is $0.0212, plus one call without reported usage (the timed-out Lightning call, at most $0.0044 by the worst case below). This is a bookkeeping fault, not a result.
+
+**Corrections, made before E03b and independent of any E03 result.**
+- The USD stop now counts spend per call: the provider-reported cost, or, for a call that reached the provider without reported usage, a worst case of 40,000 prompt tokens plus the full output budget at that tier's price. Runs stopped by the ledger before a call cost nothing. Carried-over spend is passed with `--spent-usd`.
+- `--complete` now selects every grid cell without a run that reached the model. That covers runs stopped by the ledger, as before, and also cells never started because the USD stop refused them. On the E02 data it selects exactly the 24 cells that E02b ran, so the E02b procedure is unchanged.
+
+**E03b.** As pre-registered and decided by JEV (a single pass, exactly as E02b; provenance=jev, confidence 0.2, settled in favour of the pre-registered rule): the 47 cells without an executed run are run once, with identical settings and a fresh ledger (cap 3,000,000), with `--usd-cap 0.40 --spent-usd 0.026` (Part A's $0.40 cap includes its completion). E03 is then evaluated on the union with `scripts/summarize.mjs`. If the ledger stops E03b too, the remaining cells are reported as missing, and H7 and H8 are judged on complete cells only. Part B keeps its pre-registered completion rule.

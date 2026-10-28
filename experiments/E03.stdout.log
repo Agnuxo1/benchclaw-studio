@@ -1,0 +1,155 @@
+54 runs
+ultra     release-brief    careful  seed=11 passed    8/8   3.5s tok=2965 
+super     release-brief    careful  seed=11 failed    3/4   12.7s tok=3788 
+super     release-brief    lean     seed=11 failed    7/8   11.6s tok=3467 
+ultra     release-brief    lean     seed=11 failed    7/8   6.0s tok=3093 
+lightning release-brief    lean     seed=11 passed    8/8   41.2s tok=11004 
+super     invoice-cleanup  careful  seed=11 passed    6/6   8.9s tok=2518 
+lightning release-brief    careful  seed=11 error           55.5s tok=? provider_timeout
+lightning invoice-cleanup  lean     seed=11 error           0.0s tok=? token_accounting_unknown
+super     invoice-cleanup  lean     seed=11 error           0.0s tok=? token_accounting_unknown
+ultra     invoice-cleanup  lean     seed=11 error           0.0s tok=? token_accounting_unknown
+lightning shipping-function careful  seed=11 error           0.0s tok=? token_accounting_unknown
+super     shipping-function careful  seed=11 error           0.0s tok=? token_accounting_unknown
+ultra     shipping-function careful  seed=11 error           0.0s tok=? token_accounting_unknown
+lightning shipping-function lean     seed=11 error           0.0s tok=? token_accounting_unknown
+ultra     invoice-cleanup  careful  seed=11 error           2.4s tok=1292 token_accounting_unknown
+super     shipping-function lean     seed=11 error           0.0s tok=? token_accounting_unknown
+lightning invoice-cleanup  careful  seed=11 error           28.0s tok=6064 token_accounting_unknown
+ultra     shipping-function lean     seed=11 error           0.0s tok=? token_accounting_unknown
+{
+ "byTier": {
+  "lightning": {
+   "model": "nvidia/Nemotron-3_5-Lightning",
+   "runs": 6,
+   "passRate": {
+    "mean": 0.16666666666666666,
+    "sd": null
+   },
+   "durationMs": {
+    "mean": 20787,
+    "sd": 24380.243591892187
+   },
+   "tokens": {
+    "mean": 8534
+   },
+   "costUSD": {
+    "mean": 0.0016626899999999997,
+    "known": false
+   },
+   "errors": [
+    "provider_timeout",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown"
+   ]
+  },
+  "super": {
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "runs": 6,
+   "passRate": {
+    "mean": 0.16666666666666666,
+    "sd": null
+   },
+   "durationMs": {
+    "mean": 5534.166666666667,
+    "sd": 6183.7332548119075
+   },
+   "tokens": {
+    "mean": 3257.6666666666665
+   },
+   "costUSD": {
+    "mean": 0.0018099000000000004,
+    "known": false
+   },
+   "errors": [
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown"
+   ]
+  },
+  "ultra": {
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "runs": 6,
+   "passRate": {
+    "mean": 0.16666666666666666,
+    "sd": null
+   },
+   "durationMs": {
+    "mean": 1974.1666666666667,
+    "sd": 2456.647179931759
+   },
+   "tokens": {
+    "mean": 2450
+   },
+   "costUSD": {
+    "mean": 0.004050000000000001,
+    "known": false
+   },
+   "errors": [
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown",
+    "token_accounting_unknown"
+   ]
+  }
+ },
+ "policies": {
+  "ladder": {
+   "passRate": {
+    "mean": 0.5,
+    "sd": null
+   },
+   "costUSD": 0.00241029,
+   "durationMs": 24968.666666666668,
+   "durationMsMedian": 18458.5,
+   "durationMsMax": 71674,
+   "cells": 6
+  },
+  "always_ultra": {
+   "passRate": {
+    "mean": 0.16666666666666666,
+    "sd": null
+   },
+   "costUSD": 0.004050000000000001,
+   "durationMs": 1974.1666666666667,
+   "durationMsMedian": 1197,
+   "durationMsMax": 5984,
+   "cells": 6
+  },
+  "always_super": {
+   "passRate": {
+    "mean": 0.16666666666666666,
+    "sd": null
+   },
+   "costUSD": 0.0018099000000000004,
+   "durationMs": 5534.166666666667,
+   "durationMsMedian": 4468,
+   "durationMsMax": 12687,
+   "cells": 6
+  },
+  "speculative": {
+   "passRate": {
+    "mean": 0.5,
+    "sd": null
+   },
+   "costUSD": 0.00331524,
+   "durationMs": 18190.666666666668,
+   "durationMsMedian": 4468,
+   "durationMsMax": 58987,
+   "cells": 6
+  },
+  "tier_memory": {
+   "passRate": {
+    "mean": 0.5,
+    "sd": null
+   },
+   "costUSD": 0.00241029,
+   "durationMs": 24968.666666666668,
+   "durationMsMedian": 18458.5,
+   "durationMsMax": 71674,
+   "cells": 6
+  }
+ }
+}
