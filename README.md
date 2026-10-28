@@ -1,101 +1,132 @@
+<div align="center">
+
 # BenchClaw Studio
 
-**Evidence before integration.** A developer workspace for running bounded AI-agent tasks, checking their outputs, inspecting tool permissions and comparing equivalent executions.
+**Use the cheapest NVIDIA Nemotron that actually delivers.**
 
-Submission candidate for the Nebius × NVIDIA Global AI Hackathon, **Best Apps and Agents**. This repository is a candidate build; it is not a claim of submission, sponsor endorsement, or completed live integration. See [validation](docs/VALIDATION.md) for the current evidence.
+Run real agent tasks on NVIDIA Nemotron through **Nebius Token Factory**, let deterministic checks decide pass or fail, and route every task to the smallest model tier that passes: Lightning first, then Super, then Ultra.
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-76b900.svg)](LICENSE)
+[![Tests](https://github.com/Agnuxo1/benchclaw-studio/actions/workflows/test.yml/badge.svg)](https://github.com/Agnuxo1/benchclaw-studio/actions/workflows/test.yml)
+![Node 22](https://img.shields.io/badge/node-22-339933.svg)
+![NVIDIA Nemotron](https://img.shields.io/badge/NVIDIA-Nemotron%203%20%7C%203.5-76b900.svg)
+![Nebius Token Factory](https://img.shields.io/badge/Nebius-Token%20Factory-0d1b2a.svg)
+
+**[Live replay demo](https://agnuxo1.github.io/benchclaw-studio/)** · **[Demo video](#demo-video)** · **[Results](#results-e01)** · **[Quick start](#quick-start)**
+
+<img src="docs/media/architecture.gif" alt="Auto-tier ladder: the Studio API sends a task to Nemotron 3.5 Lightning; its checks fail, so it escalates to Nemotron 3 Super, which passes; Ultra is never called" width="900">
+
+</div>
+
+## Why
+
+Teams wiring an LLM agent into a real workflow face the same question again and again: **which model is good enough for this job?** If you always pick the largest model, you pay for capability you rarely need and wait longer for every answer. If you always pick the smallest, you ship silent failures: a CSV with a lost row, a citation that does not exist, or a pricing rule that breaks at the boundary.
+
+A fluent answer does not show which of the two happened. BenchClaw Studio does.
+
+## What it does
+
+1. **Defines success before the run.** Each task has versioned inputs and deterministic acceptance checks: exact quotes against source lines, integer-cent arithmetic, and held-out boundary cases.
+2. **Runs a real agent on NVIDIA Nemotron.** The model chooses every action (read, write, check, finish). The runtime enforces tool permissions on every action, so a planted prompt injection cannot widen them.
+3. **Escalates only when the checks fail.** The **auto-tier ladder** tries `Nemotron-3.5-Lightning`, then `Nemotron-3-Super`, then `Nemotron-3-Ultra`, and stops at the first tier whose output passes every check.
+4. **Leaves evidence you can verify.** Every run records its actions, artifact, check results and Nebius request IDs, plus tokens, latency and cost. You can export it as a SHA-256-digested report and recompute its checks offline.
+
+<!-- RESULTS:START -->
+## Results (E01)
+
+_E01 is running on Nebius Token Factory. This section is generated from `experiments/E01/summary.json` when the experiment finishes._
+<!-- RESULTS:END -->
+
+## How NVIDIA Nemotron and Nebius Token Factory are used
+
+| Where | What runs | Why it matters |
+| --- | --- | --- |
+| `server/nebius.mjs` | OpenAI-compatible `POST /v1/chat/completions` on `api.tokenfactory.nebius.com`, JSON-object mode, provider seed | Every agent turn is a real Token Factory call; nothing is simulated or cached |
+| `server/models.mjs` | `nvidia/Nemotron-3_5-Lightning`, `nvidia/nemotron-3-super-120b-a12b`, `nvidia/Nemotron-3-Ultra-550b-a55b` | Three Nemotron tiers behind one API. Switching tiers is a one-field change, which is what makes the ladder cheap to build |
+| `server/ladder.mjs` | Auto-tier ladder: cheapest first, escalate on failed checks, halt on budget or auth errors | Follows the track guidance to use Nano and Super for fast, everyday calls and Ultra only when it is needed, with evidence for each choice |
+| `server/token-budget.mjs` | Durable token reservations before each call, reconciled with the usage Nebius reports | A public demo cannot overspend: admission control is enforced before any request leaves the server |
+| `scripts/bench-tiers.mjs` | The pre-registered E01 grid on all three tiers | The routing claim is measured, not asserted |
+
+Token Factory accelerated this project in two ways. First, all three Nemotron tiers sit behind one endpoint and one key, so the comparison needed no infrastructure. Second, it reports usage per call, so cost per task comes straight from provider receipts.
 
 ## Quick start
 
-Requires Node.js 22 or later and npm. All dependencies are pinned in `package-lock.json`.
+Requires Node.js 22+. No build step and one pinned runtime dependency.
 
 ```sh
+git clone https://github.com/Agnuxo1/benchclaw-studio && cd benchclaw-studio
 npm ci --ignore-scripts
-npm test
-npm start
+npm test                       # offline test suite, no network
+cp .env.example .env           # then set NEBIUS_API_KEY, STUDIO_INFERENCE_ENABLED=1 and a token cap
+npm start                      # http://127.0.0.1:4328
 ```
 
-Open **http://127.0.0.1:4328**. The task library, inputs, controls and empty states work without credentials. Inference is disabled until explicitly configured; there is no mock fallback.
-
-For a real run, copy `.env.example` to `.env` and configure these backend-only variables:
+`.env` keys (backend only, never sent to the browser):
 
 ```dotenv
-NEBIUS_API_KEY=your_private_token_factory_key
-NEBIUS_MODEL=nvidia/nemotron-3-super-120b-a12b
+NEBIUS_API_KEY=your_token_factory_key
 STUDIO_INFERENCE_ENABLED=1
+STUDIO_MAX_TOTAL_TOKENS=500000   # admission cap; 0 disables calls
 STUDIO_MAX_RUNS=30
-STUDIO_MAX_TOTAL_TOKENS=0
-STUDIO_DATA=./data
-PORT=4328
 ```
 
-Set `STUDIO_INFERENCE_ENABLED=1` **only after verifying a free-credit balance in Nebius**. Studio does not enable billing, purchase compute or recharge credits. This flag is operator confirmation, not a provider billing safeguard. Keep automatic recharge disabled at the provider. No account balance is inferred from tokens. The workspace cap counts persisted runs, with at most 12 calls and 2,048 output tokens per call, and at most two active runs. Existing data counts against the cap after restarting.
+**Without a key:** open the [live replay demo](https://agnuxo1.github.io/benchclaw-studio/). It serves the same interface with every recorded E01 run, including actions, artifacts, checks and Nebius receipts, as a read-only static site.
 
-Restart after changing backend configuration. Never paste credentials into the UI, issue trackers, screenshots or reports. `.env`, private data, runtime history and temporary caches are excluded from Git. Store the checkout, npm cache and data on D: or E: on Windows, for example `npm ci --cache D:/PROJECTS/Nebius-NVIDIA-BenchClaw-2026/.cache/npm --ignore-scripts`.
+**Docker:** `docker build -t benchclaw-studio . && docker run -p 4328:4328 --env-file .env benchclaw-studio`
 
-`STUDIO_MAX_TOTAL_TOKENS=0` disables provider calls by default. After confirming free credits and provider billing conditions, the operator must choose a positive cumulative token limit. Studio durably reserves UTF-8 prompt bytes plus a 4,096-token allowance plus maximum output before each request, then reconciles with the provider's reported usage. This is a conservative application admission estimate, not an exact model tokenizer or a monetary cap. A response exceeding its reservation blocks further calls; it cannot undo that response's consumption. Missing usage, a transport failure or an interrupted reservation after restart blocks subsequent inference until an operator reconciles the ledger against actual provider usage. Do not delete `data/token-ledger.json` to evade the limit. A cancelled request may still consume provider tokens.
+**Render:** [`render.yaml`](render.yaml) is a one-click blueprint (free plan; paste `NEBIUS_API_KEY` when prompted). It sets `STUDIO_PUBLIC_ORIGIN` and a run cap per session, so public visitors can run live tasks within a fixed token budget.
 
-## Main journey
+## Reproduce the experiment
 
-1. Open the task library and review a task's synthetic input documents and acceptance criteria.
-2. Choose **Evidence first** or **Lean execution**, using the same NVIDIA model.
-3. Select allowed tools. Revocation is enforced on each action, independently of model instructions.
-4. Start a real task. The NVIDIA model selects actions, reads the actual files, writes an artifact, checks it and can repair it within the turn budget.
-5. Inspect **Activity**, **Output**, **Checks**, **Evidence** and **Inputs**.
-6. Repeat with the other profile and identical permissions. **Compare** verifies equivalence before displaying results.
-7. Export a JSON evidence report. It includes the actual artifact, source files, deterministic checks, actions, provider receipts and a SHA-256 digest.
+```sh
+NEBIUS_API_KEY=... node scripts/bench-tiers.mjs --out experiments/E01 --seeds 11,22,33 --token-cap 3000000
+node scripts/publish-showcase.mjs experiments/E01      # refresh the evidence gallery
+python scripts/media/make_gifs.py --summary experiments/E01/summary.json
+```
 
-Recompute the artifact checks without inference: `node scripts/verify-report.mjs path/to/report.json`. This verifies consistency with the current task and validator version. The digest is not a signature and does not authenticate provider receipts. Comparisons include provider/model, inference settings and source hashes; runs from older incompatible versions are descriptive only.
+The hypotheses, decision rules and stopping rule were written in [`experiments/LOG.md`](experiments/LOG.md) and committed **before** the first live call. The pre-registration hash is in `experiments/LOG.preregistration.sha256`. Every run is stored in `experiments/E01/runs/` and summarised in `results.csv`, failures included.
 
 ## Tasks
 
-| Task | Agent artifact | Objective checks |
+| Task | Agent output | Deterministic checks |
 | --- | --- | --- |
-| Release-policy research | `brief.json` | Exact document/line/quote matches, required policy coverage, no injection citations, unchanged inputs |
-| Invoice normalization | `normalized.csv` | Exact identifiers/order, integer cents, malformed-value status, unchanged inputs |
-| Shipping function | `shipping.json` | Restricted expression program executed against boundary/discount cases, unchanged inputs |
+| **A release answer you can trace**: document research with a planted injection | `brief.json` | Required approvals and rollback steps covered; every quote matches an approved document line exactly; no citation to the injected file; inputs unchanged |
+| **Clean invoices without losing a row**: file transformation | `normalized.csv` | IDs and order preserved; European amounts converted to integer cents; malformed values marked invalid; inputs unchanged |
+| **A shipping rule with executable checks**: bounded programming | `shipping.json` | A restricted expression program is executed against threshold, weight, discount and held-out boundary cases; no shell, imports or loops |
 
-The programming task uses a small expression language, **not general JavaScript or shell execution**. The interpreter supports bounded arithmetic, comparison and conditional operations. It has no imports, loops, network calls, property access or host I/O. This is a deliberate capability boundary. It is useful for policy calculations, not a general coding-agent benchmark.
+## Architecture and safety
 
-## Architecture and integration
+- **Bounded runner** (`server/engine.mjs`): 12 turns, 180 s, 32 KiB output, a per-run virtual file map, and tool permissions checked on every action. Documents are tagged as untrusted data.
+- **EnigmAgent vault and broker** (`vendor/enigmagent`, MIT): the Nebius key and a synthetic service credential sit in an encrypted in-memory vault. Raw secret resolution is never a model-visible tool, and the protected `service_health` call returns its status only.
+- **HTTP hardening** (`server/index.mjs`): Host and Origin allowlists, strict CSP, HttpOnly SameSite cookies, request and response size limits, two concurrent runs and per-session caps in public mode.
+- **Evidence** (`scripts/verify-report.mjs`): exported reports carry the artifact, inputs, checks, provider receipts and source hashes. The checks can be recomputed without inference.
 
-```mermaid
-flowchart LR
-    UI[Browser workspace] --> API[Loopback Node API]
-    API --> Engine[Bounded agent runner]
-    Engine --> Nebius[Nebius Token Factory / NVIDIA Nemotron]
-    Engine --> Tools[Task-local file tools / acceptance checks]
-    Engine --> Broker[EnigmAgent fixed-operation broker]
-    Broker --> Fixture[Protected synthetic health service]
-    API --> Reports[Atomic per-run evidence files]
-    Vault[EnigmAgent authenticated vault] --> Nebius
-    Vault --> Broker
+## Project structure
+
+```
+server/      runner, ladder, Nemotron tiers, Token Factory client, token ledger, HTTP API
+public/      single-page workspace (no framework, no external assets)
+scripts/     tier benchmark, showcase publisher, static replay build, report verifier
+experiments/ pre-registered log, registry and raw results of every experiment
+showcase/    recorded real runs served by the replay demo
+tests/       node:test suite (offline, scripted providers only)
 ```
 
-`server/nebius.mjs` is the isolated provider client. Calls use the documented OpenAI-compatible endpoint `https://api.tokenfactory.nebius.com/v1/chat/completions`. The selected catalog identifier is **`nvidia/nemotron-3-super-120b-a12b`**; account-level availability still requires a successful authenticated call. The model drives every execution turn, rather than being a decorative analysis call. Receipts record model, provider, request ID where returned, HTTP status, measured duration, finish reason and reported tokens. Cost remains unknown without billing evidence.
+## Demo video
 
-The adapted BenchClaw HTTP client supplies the request/response pattern; Studio adds strict status errors, cancellation, bounded response sizes and redaction. EnigmAgent's unchanged v3 vault core and fixed-operation broker execute in the trusted backend. A fresh in-memory vault stores the configured Nebius key and a generated synthetic health credential. `service_health` invokes the real broker against a real local fixture; only status escapes. Nebius inference uses the trusted backend resolver because EnigmAgent's fixed GET/HEAD broker does **not** support dynamic chat POST bodies. Raw secret resolution is never a model-visible tool. See [provenance and licenses](docs/PROVENANCE.md).
+_Link added at release._
 
-## Boundaries and limitations
+## Limitations
 
-- Default loopback binding, Host checks, same-origin POST checks, HttpOnly SameSite cookies and CSP. There is no public multi-user deployment in this version.
-- Browser sessions own separate runs. Owners are hashed and excluded from exports; this is session isolation, not a user-account system. Losing the cookie loses UI access to prior history. Operators with filesystem access are trusted.
-- Each execution has a separate virtual file map. Only fixture filenames can be read, only the designated output can be written, and no child process exists. This is capability restriction, not an OS sandbox for arbitrary generated code.
-- Documents can contain malicious instructions. Policy is enforced outside the model. The model's semantic resistance still needs live testing; do not infer immunity from an allowlist.
-- Cancel aborts the active provider request and prevents late artifacts from committing. Provider-side billing/compute cancellation is not guaranteed.
-- Reports verify fixture acceptance cases and citation locations, not universal factual correctness or general intelligence. Model assessment is not used as an objective score.
-- Unknown metrics are shown as unknown, not zero. Failed authentication or network requests remain failures. No fabricated local connection codes or successful runs.
-- Credentials are encrypted in the in-memory EnigmAgent vault and resolved only by trusted backend code; a compromised OS/backend identity remains outside this boundary. Environment loading and process memory are not formal isolation.
+These are the boundaries of the current version, documented as they would be in any engineering report:
 
-## Testing and judge access
+- Three fixture tasks are evidence about **those tasks**. They are not a general ranking of the models.
+- With the product setting of temperature 0, seeds measure provider-side nondeterminism. Sampling variety would need a separate experiment.
+- Cost is computed from reported tokens × published price. It is an estimate, not an invoice.
+- The replay demo is read-only. Live runs need a Token Factory key, either locally or through the Render blueprint.
 
-```sh
-npm test
-npm run check
-npm run validate  # live only; requires configured free-credit Nebius access
-```
+## Credits and license
 
-The working test build can be run locally by judges using this README and their own authorized credentials. A downloadable runnable build and an operator-funded hosted judging route must be finalized before submission; this candidate currently does not provide cost-free inference access for judges. Review the [validation status](docs/VALIDATION.md) and [submission draft](docs/SUBMISSION.md) for exact open items.
+MIT © 2026 Francisco Angulo de Lafuente ([@Agnuxo1](https://github.com/Agnuxo1)). Built for the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents track).
 
-## Rights
-
-MIT, © 2026 Francisco Angulo de Lafuente. Upstream notices are retained under `vendor/enigmagent/LICENSE`. All task fixtures, interface markup and CSS assets are original. System fonts are used; there are no externally hosted fonts, icon packs, sponsor logos, copyrighted music or image datasets. The model is served remotely; weights are not redistributed. Its NVIDIA model license remains separate from this repository's software license.
+The models are NVIDIA Nemotron under the NVIDIA Open Model License, served remotely by Nebius Token Factory; no weights are redistributed. Upstream components from [BenchClaw](https://github.com/Agnuxo1/benchclaw) and [EnigmAgent](https://github.com/Agnuxo1/EnigmAgent) keep their MIT notices (see [docs/PROVENANCE.md](docs/PROVENANCE.md)). Fonts are system fonts; there are no third-party images, logos or music.
