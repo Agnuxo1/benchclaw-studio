@@ -1,0 +1,106 @@
+{
+ "date": "2026-10-28T12:31:00.992Z",
+ "base": "https://api.tokenfactory.nebius.com/v1/",
+ "listed": {
+  "status": 200,
+  "ids": [
+   "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+   "nvidia/Nemotron-3_5-Lightning",
+   "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "nvidia/nemotron-3-super-120b-a12b",
+   "nvidia/Nemotron-3.5-Super-VL"
+  ]
+ },
+ "rows": [
+  {
+   "tier": "lightning",
+   "model": "nvidia/Nemotron-3_5-Lightning",
+   "status": 200,
+   "listed": true,
+   "ms": 3094,
+   "finish": "stop",
+   "content": "{\"ok\": true, \"sum\": 42}",
+   "reasoning": true,
+   "usage": {
+    "completion_tokens": 320,
+    "prompt_tokens": 37,
+    "total_tokens": 357,
+    "completion_tokens_details": {
+     "accepted_prediction_tokens": null,
+     "audio_tokens": null,
+     "reasoning_tokens": 306,
+     "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": null,
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 37
+   },
+   "cost": 0.00007902,
+   "requestId": "30c061b9a4f42771e466068a2db47192",
+   "error": null
+  },
+  {
+   "tier": "super",
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "status": 200,
+   "listed": true,
+   "ms": 507,
+   "finish": "stop",
+   "content": "{\"ok\": true, \"sum\": 42}",
+   "reasoning": true,
+   "usage": {
+    "completion_tokens": 53,
+    "prompt_tokens": 37,
+    "total_tokens": 90,
+    "completion_tokens_details": {
+     "accepted_prediction_tokens": null,
+     "audio_tokens": null,
+     "reasoning_tokens": 39,
+     "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": {
+     "audio_tokens": null,
+     "cached_tokens": 0,
+     "created_cache_tokens": 0,
+     "multimodal_tokens": null
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 37
+   },
+   "cost": 0.000058800000000000006,
+   "requestId": "2a7fe2739a1d321e3ab601acd0dabe0d",
+   "error": null
+  },
+  {
+   "tier": "ultra",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "status": 200,
+   "listed": true,
+   "ms": 435,
+   "finish": "stop",
+   "content": "{\"ok\":true,\"sum\":42}",
+   "reasoning": true,
+   "usage": {
+    "completion_tokens": 69,
+    "prompt_tokens": 37,
+    "total_tokens": 106,
+    "completion_tokens_details": {
+     "accepted_prediction_tokens": null,
+     "audio_tokens": null,
+     "reasoning_tokens": 57,
+     "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": {
+     "audio_tokens": null,
+     "cached_tokens": 0,
+     "multimodal_tokens": null
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 37
+   },
+   "cost": 0.000244,
+   "requestId": "5a1d8052704754b0b8fbac31855651ac",
+   "error": null
+  }
+ ]
+}
