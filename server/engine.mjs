@@ -34,7 +34,10 @@ export async function executeRun(run,client,{signal,persist=async()=>{},health}=
   for(let step=0;step<run.limits.steps;step++){
    if(combined.aborted)throw new Error(signal?.aborted?'cancelled':'run_timeout');
    event({type:'model',title:'Waiting for NVIDIA agent',detail:`Turn ${step+1}`});await persist(run);
-   let response;try{response=await client.complete(messages,{signal:combined,temperature:PROFILES[run.profile].temperature,model:run.model||client.model,seed:run.inference.seed??undefined,maxTokens:run.inference.maxTokens});}catch(error){if(error.evidence)run.calls.push({...error.evidence,turn:step+1});throw error;}
+   // A call may use the run's remaining time (E03: a fixed 45 s per call aborted slow but valid Lightning calls and lost their usage).
+   // One extra second lets the run's own deadline fire first, so a call cut at the limit is reported as run_timeout.
+   const timeoutMs=Math.max(1000,Math.round(run.limits.timeoutMs-(performance.now()-started)))+1000;
+   let response;try{response=await client.complete(messages,{signal:combined,temperature:PROFILES[run.profile].temperature,model:run.model||client.model,seed:run.inference.seed??undefined,maxTokens:run.inference.maxTokens,timeoutMs});}catch(error){if(error.evidence)run.calls.push({...error.evidence,turn:step+1});throw error;}
    if(combined.aborted)throw new Error(signal?.aborted?'cancelled':'run_timeout');
    run.calls.push({...response.evidence,turn:step+1});messages.push({role:'assistant',content:response.content});
    let action;try{action=JSON.parse(response.content);if(!action||typeof action!=='object'||Array.isArray(action))throw new Error('not_an_action');}catch{if(++invalidStreak>=3)throw new Error('invalid_response');event({type:'error',title:'Agent returned invalid JSON',detail:'A repair turn was requested.'});messages.push({role:'user',content:'Invalid JSON. Return exactly one action object.'});continue;}

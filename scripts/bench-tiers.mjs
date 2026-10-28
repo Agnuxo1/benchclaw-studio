@@ -44,6 +44,13 @@ const broker=new OperationBroker({vault,allowLoopback:true,operations:[{name:'sy
 const ledgerFile=join(out,'token-ledger.json');
 const budget=new TokenBudget(cap,existsSync(ledgerFile)?JSON.parse(readFileSync(ledgerFile,'utf8')):undefined,s=>{writeFileSync(ledgerFile+'.tmp',JSON.stringify(s));renameSync(ledgerFile+'.tmp',ledgerFile);});
 const client=new NebiusClient(()=>vault.resolve('nebius_api','https://api.tokenfactory.nebius.com'),MODELS.super.id,undefined,budget);
+// --ledger per-run (E04): every run gets its own ledger, so a call that loses its usage stops only its own run. The USD stop stays global.
+const perRun=arg('ledger','global')==='per-run',runLedgers=[];
+const getKey=()=>vault.resolve('nebius_api','https://api.tokenfactory.nebius.com');
+const runClient=()=>{if(!perRun)return client;const b=new TokenBudget(cap);runLedgers.push(b);return new NebiusClient(getKey,MODELS.super.id,undefined,b);};
+// A ladder's runs use one tier each, so a per-tier client gives every run of the ladder its own ledger.
+const ladderClient=()=>{if(!perRun)return client;const byModel=Object.fromEntries(LADDER.map(t=>[MODELS[t].id,runClient()]));return {model:MODELS.super.id,complete:(m,o)=>byModel[o.model].complete(m,o)};};
+const ledgerSnapshot=()=>perRun?{mode:'per-run',ledgers:runLedgers.length,charged:runLedgers.reduce((a,b)=>a+b.snapshot().charged,0),blocked:runLedgers.filter(b=>b.snapshot().blocked).length}:budget.snapshot();
 const policy=arg('policy',null);
 if(policy){
  if(policy!=='speculative')throw new Error('Only --policy speculative is supported');
@@ -63,13 +70,13 @@ if(policy){
   if(!admit(3)){console.log(`USD cap reached: ${c.task} ${c.profile} seed=${c.seed} not started`);continue;}
   if(!c.ladder){
    const ladder=makeLadder(c.task,c.profile,allowed,'bench',{seed:c.seed,policy});const runs=[];
-   await executeSpeculativeLadder(ladder,client,{register:r=>runs.push(r),persistLadder:async l=>writeFile(join(out,'ladders',l.id+'.json'),JSON.stringify(l,null,2)),health:()=>broker.execute('synthetic_health')});
+   await executeSpeculativeLadder(ladder,ladderClient(),{register:r=>runs.push(r),persistLadder:async l=>writeFile(join(out,'ladders',l.id+'.json'),JSON.stringify(l,null,2)),health:()=>broker.execute('synthetic_health')});
    for(const r of runs)await save(r);done.push(ladder);charge(3,runs);
    await appendFile(lcsv,[ladder.id,ladder.createdAt,hypothesis,policy,c.task,c.profile,c.seed,ladder.status,ladder.chosenTier??'',ladder.decisionMs,ladder.durationMs,ladder.cost??'',ladder.steps.map(st=>`${st.tier}:${st.status}:${st.error??''}:${st.durationMs}`).join(' '),commit].join(',')+'\n');
    console.log(`${c.task.padEnd(16)} ${c.profile.padEnd(8)} seed=${c.seed} ${ladder.status.padEnd(10)} ${String(ladder.chosenTier).padEnd(9)} answer=${(ladder.decisionMs/1000).toFixed(1)}s settled=${(ladder.durationMs/1000).toFixed(1)}s ${ladder.steps.map(st=>st.tier[0]+':'+(st.error||st.status)).join(' ')}`);
   }else{
    const grid={};for(const st of c.ladder.steps){const r=priorRuns.get(st.runId);if(r&&!NOT_EXECUTED.has(r.error)&&r.status!=='cancelled')grid[st.tier]=r;}
-   const rerun=async tier=>{const r=makeRun(c.task,c.profile,allowed,'bench',MODELS[tier].id,{seed:c.seed,maxTokens});await executeRun(r,client,{health:()=>broker.execute('synthetic_health')});await save(r);grid[tier]=r;};
+   const rerun=async tier=>{const r=makeRun(c.task,c.profile,allowed,'bench',MODELS[tier].id,{seed:c.seed,maxTokens});await executeRun(r,runClient(),{health:()=>broker.execute('synthetic_health')});await save(r);grid[tier]=r;};
    await Promise.all(LADDER.slice(0,2).filter(t=>!grid[t]).map(rerun));
    if(!LADDER.slice(0,2).some(t=>grid[t].status==='passed')&&!grid.ultra)await rerun('ultra');
    const composed={...c.ladder,id:c.ladder.id,composedFrom:prior,steps:LADDER.filter(t=>grid[t]).map(t=>({tier:t,runId:grid[t].id,status:grid[t].status,error:grid[t].error,cost:grid[t].cost,tokens:grid[t].tokens,durationMs:grid[t].durationMs}))};
@@ -78,7 +85,7 @@ if(policy){
   }
  }
  service.close();
- const summary={spentUSD,usdCap:Number.isFinite(usdCap)?usdCap:null,capStops,...summarizeLadders(done,new Map(mergeRuns([join(out,'runs'),...(prior?[join(prior,'runs')]:[])]).map(r=>[r.id,r]))),policy,commit,maxTokens,seeds,tasks,profiles,tokenLedger:budget.snapshot(),completes:prior};
+ const summary={spentUSD,usdCap:Number.isFinite(usdCap)?usdCap:null,capStops,...summarizeLadders(done,new Map(mergeRuns([join(out,'runs'),...(prior?[join(prior,'runs')]:[])]).map(r=>[r.id,r]))),policy,commit,maxTokens,seeds,tasks,profiles,tokenLedger:ledgerSnapshot(),completes:prior};
  await writeFile(join(out,'summary.json'),JSON.stringify(summary,null,2));console.log(JSON.stringify(summary.aggregate,null,1));process.exit(0);
 }
 const csv=join(out,'results.csv');
@@ -95,7 +102,7 @@ async function worker(){
   if(!admit(1)){if(inflightRuns>0)return;next=jobs.length;break;}
   const {seed,task,profile,tier}=jobs[next++];
   const run=makeRun(task,profile,TASKS.find(t=>t.id===task).tools,'bench',MODELS[tier].id,{seed,maxTokens});
-  await executeRun(run,client,{health:()=>broker.execute('synthetic_health')});
+  await executeRun(run,runClient(),{health:()=>broker.execute('synthetic_health')});
   const s=JSON.stringify(run).split(key).join('[REDACTED]');await writeFile(join(out,'runs',run.id+'.json'),s);
   results.push(JSON.parse(s));charge(1,[run]);
   const checks=run.result?`${run.result.passedCount}/${run.result.total}`:'';
@@ -105,6 +112,6 @@ async function worker(){
 }
 await Promise.all(Array.from({length:concurrency},worker));
 service.close();
-const summary=summarize(results,{tiers,seeds,profiles,tasks,commit,maxTokens,tokenLedger:budget.snapshot(),completes:complete,spentUSD,usdCap:Number.isFinite(usdCap)?usdCap:null,notStarted:jobs.length-results.length});
+const summary=summarize(results,{tiers,seeds,profiles,tasks,commit,maxTokens,tokenLedger:ledgerSnapshot(),completes:complete,spentUSD,usdCap:Number.isFinite(usdCap)?usdCap:null,notStarted:jobs.length-results.length});
 await writeFile(join(out,'summary.json'),JSON.stringify(summary,null,2));
 console.log(JSON.stringify({byTier:summary.byTier,policies:summary.policies},null,1));

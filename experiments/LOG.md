@@ -131,3 +131,47 @@ The error code shown for blocked calls was misleading: `token_budget_overrun` ap
 - `--complete` now selects every grid cell without a run that reached the model. That covers runs stopped by the ledger, as before, and also cells never started because the USD stop refused them. On the E02 data it selects exactly the 24 cells that E02b ran, so the E02b procedure is unchanged.
 
 **E03b.** As pre-registered and decided by JEV (a single pass, exactly as E02b; provenance=jev, confidence 0.2, settled in favour of the pre-registered rule): the 47 cells without an executed run are run once, with identical settings and a fresh ledger (cap 3,000,000), with `--usd-cap 0.40 --spent-usd 0.026` (Part A's $0.40 cap includes its completion). E03 is then evaluated on the union with `scripts/summarize.mjs`. If the ledger stops E03b too, the remaining cells are reported as missing, and H7 and H8 are judged on complete cells only. Part B keeps its pre-registered completion rule.
+
+### E03 results (2026-10-28, complete cells only, `experiments/E03/summary-combined.json`)
+
+E03b was stopped by the ledger as well, again by a Lightning call over the 45 s transport timeout: 7 of its 47 runs reached the model and 40 were stopped. Over E03 plus E03b, **only 4 of the 18 cells have all three tiers executed, all of them seed 11.** As pre-registered, the other 14 cells are missing and the hypotheses are judged on the 4 complete cells. Runs stopped by the ledger count as missing data, not failures: `scripts/summarize.mjs` now excludes them, which leaves the E02 figures unchanged because E02 had none. With a single seed there is no standard deviation.
+
+| Policy (4 complete cells) | Pass rate | Mean answer time | Median | Max | Mean cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| Sequential ladder (control) | 1.00 | 64.4 s | 66.0 s | 84.4 s | 0.00173 |
+| Always-Ultra (control) | 0.75 | 6.0 s | 5.3 s | 9.9 s | 0.00589 |
+| **Speculative ladder** | 1.00 | **30.8 s** | 27.6 s | 59.0 s | 0.00338 |
+| Tier memory | 1.00 | 64.4 s | 66.0 s | 84.4 s | 0.00173 |
+
+- **H7: rejected.** (a) holds: 1.00 ≥ 1.00 − 0.05. (b) fails: 30.8 s is not < 30 s. (c) holds: $0.00338 < $0.00589. The speculative ladder halved the sequential ladder's answer time (64.4 s → 30.8 s) at about twice its cost, but it missed the latency threshold by 0.8 s. The evidence is thin, with 4 cells and one seed.
+- **H8: rejected and uninformative.** Only seed 11 is complete, so tier memory never applied and the policy equals the sequential ladder.
+- **Part B was not run.** The product rule needed H7 and H7-live, so Part B could no longer change the decision, and it would have faced the same ledger stops (JEV, provenance=jev, 0.22 for running it). This is a deviation from the plan, recorded here before any further call.
+- **Cause of the stops: provider throughput changed during the day.** The median of completion tokens per second of call time was, in E02 (from 12:35 UTC) against E03 (14:44–15:30 UTC): Lightning 264 → 78, Super 125 → 84, Ultra 138 → 137. At 78 tok/s, an 8,192-token Lightning call needs about 105 s. That is within the 180 s run limit but beyond the fixed 45 s per-call transport timeout, which aborts the call and loses its usage, and the global ledger then stops everything.
+- **Spend.** E03 $0.0212 and E03b $0.0259, provider-reported, plus 2 calls without usage (at most $0.0044 each).
+
+## E04 — E03 repeated with a call timeout bounded by the run and one ledger per run (pre-registered 2026-10-28, before any E04 call)
+
+**Why.** E03 could not answer its question, because one slow call stopped the whole grid twice. E04 repeats E03 with two changes that address only that operational failure, both written before any E04 data and independent of the H7 result:
+1. **Product (`server/engine.mjs`, `server/nebius.mjs`).** A provider call may use the run's remaining time plus 1 s, instead of the fixed 45 s transport default. The run's own 180 s limit, which is unchanged, still bounds every call. The extra second lets the run deadline fire first, so a call cut at the limit is reported as `run_timeout`. With E02's throughput no call took more than 28 s, so this change would not have altered E02.
+2. **Benchmark (`scripts/bench-tiers.mjs --ledger per-run`).** Each run has its own token ledger, with the same reservation and reconciliation rules. A call that loses its usage then stops only its own run. The global monetary stop (`--usd-cap`, per call) still bounds total spend. The Studio server keeps its single global ledger, unchanged.
+
+JEV chose to run E04 now (provenance=jev; 0.14, settled in its favour by the remaining budget and time, and by the failure being operational rather than result-dependent). JEV also gave 0.57 for the timeout fix. Provider throughput per tier is reported as a covariate.
+
+**Design.** As E03 in every other respect:
+- *Part A.* A fresh 54-run grid (3 tasks × 2 profiles × seeds 11, 22, 33 × 3 tiers), 8,192 output tokens, temperature 0, 12 turns, 180 s per run, concurrency 3, the same checks and prices; the five policies evaluated offline with `scripts/summarize.mjs`.
+- *Part B.* The live speculative executor once per cell, 18 cells, one at a time. Part B runs **only if H9 is accepted**, because otherwise it cannot change the product decision.
+
+**Hypotheses and decision rules** (means over complete cells; each judged separately).
+- **H9 (speculative, primary).** As H7, on the E04 grid: (a) pass rate ≥ sequential ladder − 0.05; (b) mean answer time < 30 s; (c) mean cost < always-Ultra. All three must hold.
+- **H9-live (Part B).** As H7-live: the live pass rate ≥ the E04 sequential ladder's − 0.05; live mean answer time < 30 s; live mean cost < the E04 always-Ultra cost.
+- **H10 (tier memory, secondary).** As H8, on the E04 grid.
+- **H11 (robustness of the timeout change).** No E04 run ends with `provider_timeout`, and no cell is missing because of a ledger stop.
+- Reported without a decision rule: median and maximum answer time, cells resolved per tier, per-tier throughput, and the offline latency model's error against the clock (Part B).
+
+**Product rules.**
+- The speculative ladder becomes an extra Studio policy, with nothing removed, only if H9 and H9-live are both accepted.
+- Tier memory is added only if H10 is accepted.
+- The call-timeout change stays in the release only if H11 holds and all tests pass; otherwise it is reverted.
+- E01–E03 are not modified, and E04 does not replace their results. Each experiment is reported under its own conditions.
+
+**Stopping rules and budget.** Spend in this phase before E04: at most $0.056. Part A runs with `--usd-cap 0.40` and Part B with `--usd-cap 0.25`, so the phase total stays at or below $0.71, under the $1.00 budget. If any runs are stopped by their own ledger, the cells without an executed run get a single completion pass (`--complete`, the same settings, the cap minus what was spent), as in E03b. Any cells still missing are reported, and the hypotheses are judged on complete cells only.

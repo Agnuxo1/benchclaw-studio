@@ -1,0 +1,255 @@
+{
+  "generatedAt": "2026-10-28T14:51:12.131Z",
+  "sources": [
+    "experiments/E03/runs",
+    "experiments/E03b/runs"
+  ],
+  "maxTokens": 8192,
+  "notExecuted": 40,
+  "tiers": [
+    "lightning",
+    "super",
+    "ultra"
+  ],
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "profiles": [
+    "careful",
+    "lean"
+  ],
+  "tasks": [
+    "invoice-cleanup",
+    "release-brief",
+    "shipping-function"
+  ],
+  "byTier": {
+    "lightning": {
+      "model": "nvidia/Nemotron-3_5-Lightning",
+      "runs": 4,
+      "passRate": {
+        "mean": 0.5,
+        "sd": null
+      },
+      "durationMs": {
+        "mean": 56909.75,
+        "sd": 12172.478010523027
+      },
+      "tokens": {
+        "mean": 8804.5
+      },
+      "costUSD": {
+        "mean": 0.0017276099999999996,
+        "known": false
+      },
+      "errors": [
+        "provider_timeout",
+        "provider_timeout"
+      ]
+    },
+    "super": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "runs": 5,
+      "passRate": {
+        "mean": 0.6,
+        "sd": null
+      },
+      "durationMs": {
+        "mean": 11377,
+        "sd": 2035.113756034291
+      },
+      "tokens": {
+        "mean": 3624.4
+      },
+      "costUSD": {
+        "mean": 0.00199344,
+        "known": true
+      },
+      "errors": []
+    },
+    "ultra": {
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "runs": 5,
+      "passRate": {
+        "mean": 0.8,
+        "sd": null
+      },
+      "durationMs": {
+        "mean": 5318.8,
+        "sd": 2828.2378259262427
+      },
+      "tokens": {
+        "mean": 3175
+      },
+      "costUSD": {
+        "mean": 0.005441400000000001,
+        "known": true
+      },
+      "errors": []
+    }
+  },
+  "policies": {
+    "ladder": {
+      "passRate": {
+        "mean": 1,
+        "sd": null
+      },
+      "costUSD": 0.0017276099999999996,
+      "durationMs": 64421.25,
+      "durationMsMedian": 66046.5,
+      "durationMsMax": 84371,
+      "cells": 4
+    },
+    "always_ultra": {
+      "passRate": {
+        "mean": 0.75,
+        "sd": null
+      },
+      "costUSD": 0.0058885,
+      "durationMs": 5966.75,
+      "durationMsMedian": 5260.5,
+      "durationMsMax": 9879,
+      "cells": 4
+    },
+    "always_super": {
+      "passRate": {
+        "mean": 0.5,
+        "sd": null
+      },
+      "costUSD": 0.0020853750000000004,
+      "durationMs": 11774.25,
+      "durationMsMedian": 12134.5,
+      "durationMsMax": 13892,
+      "cells": 4
+    },
+    "speculative": {
+      "passRate": {
+        "mean": 1,
+        "sd": null
+      },
+      "costUSD": 0.00338016,
+      "durationMs": 30759,
+      "durationMsMedian": 27556.5,
+      "durationMsMax": 58987,
+      "cells": 4
+    },
+    "tier_memory": {
+      "passRate": {
+        "mean": 1,
+        "sd": null
+      },
+      "costUSD": 0.0017276099999999996,
+      "durationMs": 64421.25,
+      "durationMsMedian": 66046.5,
+      "durationMsMax": 84371,
+      "cells": 4
+    }
+  },
+  "cells": [
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 8936
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "lightning",
+        "path": [
+          "lightning"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ],
+      "speculative": {
+        "chosenTier": "ultra",
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ],
+        "durationMs": 58987
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "ultra",
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ],
+      "speculative": {
+        "chosenTier": "lightning",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 41221
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "lightning",
+        "path": [
+          "lightning"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 13892
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ]
+      }
+    }
+  ]
+}

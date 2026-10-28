@@ -13,13 +13,14 @@ const sd=a=>a.length>1?Math.sqrt(a.reduce((s,x)=>s+(x-mean(a))**2,0)/(a.length-1
 export function summarize(results,{tiers,seeds,profiles,tasks,...meta}){
  const summary={generatedAt:new Date().toISOString(),...meta,tiers,seeds,profiles,tasks,byTier:{},policies:{}};
  for(const tier of tiers){
-  const rs=results.filter(r=>r.tier===tier);const perSeed=seeds.map(s=>rs.filter(r=>r.inference.seed===s)).filter(g=>g.length);
+  // Runs stopped by the ledger before reaching the model are missing data, not failures (E03 rule: judge on complete cells only).
+  const rs=results.filter(r=>r.tier===tier&&!NOT_EXECUTED.has(r.error));const perSeed=seeds.map(s=>rs.filter(r=>r.inference.seed===s)).filter(g=>g.length);
   summary.byTier[tier]={model:MODELS[tier].id,runs:rs.length,passRate:{mean:mean(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length)),sd:sd(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length))},
    durationMs:{mean:mean(rs.map(r=>r.durationMs)),sd:sd(rs.map(r=>r.durationMs))},tokens:{mean:mean(rs.filter(r=>r.tokens!==null).map(r=>r.tokens))},costUSD:{mean:mean(rs.filter(r=>r.cost!==null).map(r=>r.cost)),known:rs.every(r=>r.cost!==null)},errors:rs.filter(r=>r.status==='error').map(r=>r.error)};
  }
  if(LADDER.every(t=>tiers.includes(t))){
   // Tier memory (E03 H8): seeds are taken in ascending order as time; a task and profile start at the tier that resolved their latest earlier seed, else at Lightning.
-  const cells=[],memory=new Map();for(const seed of [...seeds].sort((a,b)=>a-b))for(const task of tasks)for(const profile of profiles){const grid=Object.fromEntries(LADDER.map(t=>[t,results.find(r=>r.tier===t&&r.taskId===task&&r.profile===profile&&r.inference.seed===seed)]));if(!LADDER.every(t=>grid[t]))continue;
+  const cells=[],memory=new Map();for(const seed of [...seeds].sort((a,b)=>a-b))for(const task of tasks)for(const profile of profiles){const grid=Object.fromEntries(LADDER.map(t=>[t,results.find(r=>r.tier===t&&r.taskId===task&&r.profile===profile&&r.inference.seed===seed)]));if(!LADDER.every(t=>grid[t]&&!NOT_EXECUTED.has(grid[t].error)))continue;
    const key=task+'|'+profile,start=memory.get(key)||LADDER[0],remembered=evaluatePolicy(grid,LADDER.slice(LADDER.indexOf(start)));if(remembered.chosenTier)memory.set(key,remembered.chosenTier);
    cells.push({seed,task,profile,ladder:evaluatePolicy(grid),speculative:evaluateSpeculative(grid),memory:{...remembered,startTier:start},ultra:grid.ultra,super:grid.super});}
   const pol=(name,pick)=>{const per=seeds.map(s=>cells.filter(c=>c.seed===s).map(pick)).filter(g=>g.length);const all=cells.map(pick);summary.policies[name]={passRate:{mean:mean(per.map(g=>g.filter(x=>x.passed).length/g.length)),sd:sd(per.map(g=>g.filter(x=>x.passed).length/g.length))},costUSD:mean(all.map(x=>x.cost).filter(Number.isFinite)),durationMs:mean(all.map(x=>x.durationMs)),durationMsMedian:median(all.map(x=>x.durationMs)),durationMsMax:all.length?Math.max(...all.map(x=>x.durationMs)):null,cells:all.length};};
