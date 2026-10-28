@@ -232,3 +232,48 @@ Per tier: Lightning 0.556 ± 0.096 (60.7 s, $0.00285 per run), Super 0.556 ± 0.
 - **Per-tier cost per run had the same bias as the policy costs.** Runs with an unknown cost were left out of the mean. With every run included (low – high), Lightning's cost per run is $0.00329 – $0.00354 in E02, against the $0.00284 published, and $0.00338 – $0.00387 in E04, against the $0.00285 written in the E04 results above. Super and Ultra are unaffected, and so is E01. `byTier.costUSD` now also has `low` and `high`, and `docs/media/tiers.gif` uses the high bound.
 - **"Ultra … served more tokens per second" (E01 results) is withdrawn.** Measured as the median of completion tokens per second of call time, Lightning was the fastest at serving tokens in every experiment: E01 217, Super 115, Ultra 180; E02 264, 125, 138; E04 227, 140, 138. Ultra is the fastest tier *per task* because it needs fewer turns and tokens. H2 is unaffected, since it was about run time.
 - *Rounding note (same day):* the E02 saving range quoted in the erratum above as "0.2% to 4.2%" is 0.2% to 4.1%, computed from unrounded values: ($0.0061157 − $0.0058639) / $0.0061157 = 4.1%, and the low end is 0.15%.
+
+
+## Independent correction —28October, no new inference
+The error-code-only NOT_EXECUTED rule incorrectly replaced two E02 rows containing real provider calls (Super:3calls;Lightning:2calls). Only22rows had no provider call. All original and recovery files remain unchanged. The primary merger now preserves first attempts; explicit --recover-ledger-failures produces a labelled secondary analysis with replacement provenance. --complete can no longer rerun an attempted row solely because its error was a ledger error.
+Offline evaluatePolicy now obeys the same HALT conditions as executeLadder; it does not counterfactually escalate through a global budget stop. This is a real replay/live consistency fix.
+Primary E02: Lightning11/18,Super12/18,Ultra14/18;ladder15/18. Matched17-cell costs ladder$.004043975 vsUltra$.005960471,32.1534%lower. Recovery remains16/18 and30.6395%lower matchedcost. Passesuseall18cells. Oneunknown-costtimeoutisexcludedfrombothcostarms,notzero. Costsareestimatesfromtokensandrecordedcatalogueprices. All110provider-attemptedbenchmarkruns(109knowncost,$.43173212)arecounted;108primarygridrows.
+H4/H5/H6stillholdonprimaryresults;8192defaultretained. Historical combined summary is preserved as superseded recovery analysis, not overwritten. Four regression tests plus full44-testoffline suite pass. No APIcallor paidexperimentwas added by this correction. Three taskinputsarecontrolledsyntheticfixtures;providerreceiptsarephysical,notasurrogateclaimforbroaderreal-worldvalidation.
+
+## Reconciliation of the two corrections (28 October, evening, no new inference)
+
+Two corrections of E02 were written in parallel on 28 October: the cost bounds above (this branch), and the independent correction just above (`main`, 16:23). They were merged and reconciled with the evidence below. JEV decided the integration (provenance=jev): keep every valid fix of the independent correction (confidence 1.0), make the pre-registered first-attempt analysis primary (0.98), and publish costs as bounds, not matched-cell means (0.86).
+
+**Adopted: first provider attempts are kept.** The E02b and E03b plans say that a later run replaces a cell only when the earlier run never reached the model. The code decided this from the error code alone. Two E02 rows stopped by the ledger had already made provider calls (Super, 3 calls; Lightning, 2 calls), and so had two E03 rows. They are now kept as executed failures, and `scripts/summarize.mjs` replaces only ledger-stopped rows with zero provider calls. `--recover-ledger-failures` gives the old behaviour as a labelled secondary analysis. The offline sequential and speculative ladders now stop on the same budget errors as the live executors.
+
+**Not adopted: the matched-cell cost.** The 32.15% saving compares the 17 cells whose cost is known in both arms. The one excluded cell, seed 11 · shipping-function · careful, is the most expensive cell of the grid. On the ladder path, Lightning timed out after 12 calls, 11 of them with reported usage; Super hit the step limit ($0.0156); and Ultra passed ($0.0088). The provider therefore reported at least $0.0353 of ladder spend in that cell, against $0.0088 for always-Ultra. Dropping the cell from both arms drops reported, certain spend, and it favours the ladder. The matched-cell means stay in the summaries as `pairedCostComparisons`, a sensitivity check. Published costs and decisions use the bounds over all 18 cells.
+
+**E02, primary analysis (first attempt kept; `experiments/E02/summary-primary-corrected.json`).**
+
+| E02 policy | Pass rate | Cost per task (USD) | Mean time |
+| --- | --- | --- | --- |
+| Sequential ladder | 0.833 ± 0.000 (15/18) | 0.00578 – 0.00602 | 54.1 s |
+| Always-Ultra | 0.778 ± 0.096 (14/18) | 0.00612 | 7.2 s |
+| Always-Super | 0.667 ± 0.167 (12/18) | 0.00294 | 15.3 s |
+
+Per tier: Lightning 0.611 (11/18), Super 0.667, Ultra 0.778. Lightning's remaining failures are 2 `step_limit`, 1 `run_timeout`, 1 `incomplete_response`, 2 failed checks and 1 ledger stop after 2 calls.
+- **H4: still accepted.** Lightning went from 0.056 to 0.611, and its `incomplete_response` share fell from 17/18 to 1/18.
+- **H5: still accepted.** 0.833 ≥ 0.778 − 0.05. The ladder's high bound, $0.00602, is below always-Ultra's $0.00612, a saving of 1.5–5.5%.
+- **H6: still accepted.** Super 0.667 → 0.667, and Ultra 0.667 → 0.778.
+- *Secondary, recovery analysis* (`experiments/E02/summary-recovery-explicit.json`): ladder 0.889, $0.00586 – 0.00611 (0.2–4.1% saving), 55.1 s; Lightning 0.667. These are the figures published earlier on 28 October.
+
+**E03, primary analysis (`experiments/E03/summary-primary.json`).** With first attempts kept, **5 of 18 cells** have all three tiers executed, not 4: the 4 earlier cells plus seed 11 · invoice-cleanup · lean, all of seed 11.
+
+| Policy (5 cells) | Pass rate | Mean answer time | Cost per task (USD) |
+| --- | --- | --- | --- |
+| Sequential ladder | 0.60 | 63.7 s | 0.0031 – 0.0049 |
+| Always-Ultra | 0.60 | 4.9 s | 0.0051 |
+| Speculative ladder | 1.00 | 26.6 s | 0.0041 – 0.0059 |
+| Tier memory | 0.60 | 63.7 s | 0.0031 – 0.0049 |
+
+- **H7: still not accepted, now on cost.** (a) holds, and so does (b): 26.6 s < 30 s. But (c) cannot be shown: the speculative ladder's high bound, $0.0059, is above always-Ultra's $0.0051, because two of its runs lost their usage. As in E04, unknown costs count against the hypothesis. With 5 of 18 cells, E03 still cannot answer the question, and E04 does.
+- **H8: unchanged.** Tier memory never applied (every cell started at Lightning), so it equals the sequential ladder.
+
+**E01 and E04 are unchanged.** They had no replaced rows and no budget halts. Every E01 and E04 figure published above recomputes identically with the merged code.
+
+**Totals.** 182 benchmark runs reached Token Factory across E01–E04 (E01 54, E02 32, E02b 24, E03 9, E03b 9, E04 54). The earlier count of 176 left out the 6 ledger-stopped runs that had made calls. Five runs lost the usage of one call. Provider-reported spend is $0.715, at most $0.737 with the worst case for those calls.

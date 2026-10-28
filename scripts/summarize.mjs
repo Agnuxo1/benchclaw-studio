@@ -1,12 +1,15 @@
 // Aggregates recorded tier-benchmark runs: mean and sample SD across seeds per tier, plus offline routing policies.
 // CLI: node scripts/summarize.mjs --runs experiments/E02/runs,experiments/E02b/runs --out experiments/E02/summary-combined.json
-// Runs stopped by the application token ledger before reaching the model (NOT_EXECUTED) are replaced by a later run of the same cell.
+// Runs stopped by the application token ledger before any provider call are replaced by a later run of the same cell. Runs that reached
+// the model are kept (pre-registered E02b rule); --recover-ledger-failures also replaces them, as a labelled secondary analysis.
 import {readdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {MODELS,LADDER,callCost} from '../server/models.mjs';
 import {evaluatePolicy,evaluateSpeculative} from '../server/ladder.mjs';
 export const NOT_EXECUTED=new Set(['token_accounting_unknown','token_budget_overrun','token_budget_exhausted']);
+// An error code alone cannot prove that no provider call was attempted.
+export const isNotExecuted=r=>NOT_EXECUTED.has(r?.error)&&Array.isArray(r.calls)&&r.calls.length===0;
 const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
 const median=a=>{if(!a.length)return null;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
 // Cost bounds per run (E04): calls without reported usage count 0 at the low end and, at the high end, 40,000 prompt tokens plus the
@@ -21,18 +24,18 @@ export function summarize(results,{tiers,seeds,profiles,tasks,...meta}){
  const summary={generatedAt:new Date().toISOString(),...meta,tiers,seeds,profiles,tasks,byTier:{},policies:{}};
  for(const tier of tiers){
   // Runs stopped by the ledger before reaching the model are missing data, not failures (E03 rule: judge on complete cells only).
-  const rs=results.filter(r=>r.tier===tier&&!NOT_EXECUTED.has(r.error));const perSeed=seeds.map(s=>rs.filter(r=>r.inference.seed===s)).filter(g=>g.length);
+  const rs=results.filter(r=>r.tier===tier&&!isNotExecuted(r));const perSeed=seeds.map(s=>rs.filter(r=>r.inference.seed===s)).filter(g=>g.length);
   summary.byTier[tier]={model:MODELS[tier].id,runs:rs.length,passRate:{mean:mean(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length)),sd:sd(perSeed.map(g=>g.filter(r=>r.status==='passed').length/g.length))},
-   durationMs:{mean:mean(rs.map(r=>r.durationMs)),sd:sd(rs.map(r=>r.durationMs))},tokens:{mean:mean(rs.filter(r=>r.tokens!==null).map(r=>r.tokens))},costUSD:{mean:mean(rs.filter(r=>r.cost!==null).map(r=>r.cost)),known:rs.every(r=>r.cost!==null),low:mean(rs.map(r=>costBounds(r)[0])),high:mean(rs.map(r=>costBounds(r)[1]))},throughputTokS:throughput(rs),errors:rs.filter(r=>r.status==='error').map(r=>r.error)};
+   durationMs:{mean:mean(rs.map(r=>r.durationMs)),sd:sd(rs.map(r=>r.durationMs))},tokens:{mean:mean(rs.filter(r=>r.tokens!==null).map(r=>r.tokens))},costUSD:{mean:mean(rs.filter(r=>Number.isFinite(r.cost)).map(r=>r.cost)),known:rs.every(r=>Number.isFinite(r.cost)),knownRuns:rs.filter(r=>Number.isFinite(r.cost)).length,totalRuns:rs.length,low:mean(rs.map(r=>costBounds(r)[0])),high:mean(rs.map(r=>costBounds(r)[1]))},throughputTokS:throughput(rs),errors:rs.filter(r=>r.status==='error').map(r=>r.error)};
  }
  if(LADDER.every(t=>tiers.includes(t))){
   // Tier memory (E03 H8): seeds are taken in ascending order as time; a task and profile start at the tier that resolved their latest earlier seed, else at Lightning.
   // A task and profile whose earlier seed is incomplete has no real history, so tier memory skips its later seeds (E04 rule).
-  const cells=[],memory=new Map(),broken=new Set();for(const seed of [...seeds].sort((a,b)=>a-b))for(const task of tasks)for(const profile of profiles){const key=task+'|'+profile;const grid=Object.fromEntries(LADDER.map(t=>[t,results.find(r=>r.tier===t&&r.taskId===task&&r.profile===profile&&r.inference.seed===seed)]));if(!LADDER.every(t=>grid[t]&&!NOT_EXECUTED.has(grid[t].error))){broken.add(key);continue;}
+  const cells=[],memory=new Map(),broken=new Set();for(const seed of [...seeds].sort((a,b)=>a-b))for(const task of tasks)for(const profile of profiles){const key=task+'|'+profile;const grid=Object.fromEntries(LADDER.map(t=>[t,results.find(r=>r.tier===t&&r.taskId===task&&r.profile===profile&&r.inference.seed===seed)]));if(!LADDER.every(t=>grid[t]&&!isNotExecuted(grid[t]))){broken.add(key);continue;}
    let remembered=null;if(!broken.has(key)){const start=memory.get(key)||LADDER[0];remembered={...evaluatePolicy(grid,LADDER.slice(LADDER.indexOf(start))),startTier:start};if(remembered.chosenTier)memory.set(key,remembered.chosenTier);}
    cells.push({seed,task,profile,grid,ladder:evaluatePolicy(grid),speculative:evaluateSpeculative(grid),memory:remembered,ultra:grid.ultra,super:grid.super});}
   const pol=(name,pick,use=()=>true)=>{const cs=cells.filter(use),per=seeds.map(s=>cs.filter(c=>c.seed===s).map(pick)).filter(g=>g.length);const all=cs.map(pick);const b=cs.map((c,i)=>pathBounds(c.grid,all[i].path));
-   summary.policies[name]={passRate:{mean:mean(per.map(g=>g.filter(x=>x.passed).length/g.length)),sd:sd(per.map(g=>g.filter(x=>x.passed).length/g.length))},costUSD:mean(all.map(x=>x.cost).filter(Number.isFinite)),costKnownCells:all.filter(x=>Number.isFinite(x.cost)).length,costUSDLow:mean(b.map(x=>x[0])),costUSDHigh:mean(b.map(x=>x[1])),durationMs:mean(all.map(x=>x.durationMs)),durationMsMedian:median(all.map(x=>x.durationMs)),durationMsMax:all.length?Math.max(...all.map(x=>x.durationMs)):null,cells:all.length};};
+   summary.policies[name]={passRate:{mean:mean(per.map(g=>g.filter(x=>x.passed).length/g.length)),sd:sd(per.map(g=>g.filter(x=>x.passed).length/g.length))},costUSD:mean(all.map(x=>x.cost).filter(Number.isFinite)),costCoverage:{knownCells:all.filter(x=>Number.isFinite(x.cost)).length,totalCells:all.length,complete:all.every(x=>Number.isFinite(x.cost))},costUSDLow:mean(b.map(x=>x[0])),costUSDHigh:mean(b.map(x=>x[1])),durationMs:mean(all.map(x=>x.durationMs)),durationMsMedian:median(all.map(x=>x.durationMs)),durationMsMax:all.length?Math.max(...all.map(x=>x.durationMs)):null,cells:all.length};};
   pol('ladder',c=>({passed:!!c.ladder.chosenTier,cost:c.ladder.cost,durationMs:c.ladder.durationMs,path:c.ladder.path}));
   pol('always_ultra',c=>({passed:c.ultra.status==='passed',cost:c.ultra.cost,durationMs:c.ultra.durationMs,path:['ultra']}));
   pol('always_super',c=>({passed:c.super.status==='passed',cost:c.super.cost,durationMs:c.super.durationMs,path:['super']}));
@@ -41,6 +44,14 @@ export function summarize(results,{tiers,seeds,profiles,tasks,...meta}){
   // H10's controls on exactly the cells tier memory was evaluated on.
   pol('ladder_on_memory_cells',c=>({passed:!!c.ladder.chosenTier,cost:c.ladder.cost,durationMs:c.ladder.durationMs,path:c.ladder.path}),c=>c.memory);
   pol('always_ultra_on_memory_cells',c=>({passed:c.ultra.status==='passed',cost:c.ultra.cost,durationMs:c.ultra.durationMs,path:['ultra']}),c=>c.memory);
+  // Complete-case sensitivity check: it drops every cell whose cost is unknown in either arm. When the unknown cell is an expensive one
+  // (E02: a Lightning run that timed out after 11 reported calls), this favours the ladder, so decisions and published costs use the bounds.
+  summary.pairedCostComparisons={};
+  for(const name of ['ultra','super']){
+   const paired=cells.filter(c=>Number.isFinite(c.ladder.cost)&&Number.isFinite(c[name].cost));
+   const a=mean(paired.map(c=>c.ladder.cost)),b=mean(paired.map(c=>c[name].cost));
+   summary.pairedCostComparisons['ladder_vs_always_'+name]={knownPairs:paired.length,totalCells:cells.length,ladderMeanUSD:a,controlMeanUSD:b,deltaMeanUSD:a===null||b===null?null:a-b,relativeSaving:a===null||!b?null:1-a/b,excludedCells:cells.filter(c=>!Number.isFinite(c.ladder.cost)||!Number.isFinite(c[name].cost)).map(c=>({seed:c.seed,task:c.task,profile:c.profile}))};
+  }
   summary.cells=cells.map(c=>({seed:c.seed,task:c.task,profile:c.profile,chosenTier:c.ladder.chosenTier,path:c.ladder.path,speculative:{chosenTier:c.speculative.chosenTier,path:c.speculative.path,durationMs:c.speculative.durationMs},memory:c.memory&&{startTier:c.memory.startTier,chosenTier:c.memory.chosenTier,path:c.memory.path}}));
  }
  return summary;
@@ -60,17 +71,22 @@ export function summarizeLadders(ladders,runsById){
   chosen:Object.fromEntries(LADDER.map(t=>[t,cells.filter(c=>c.chosenTier===t).length])),latencyModel:{cells:measured.length,meanAbsErrorMs:mean(measured.map(c=>Math.abs(c.answerMs-c.predictedMs))),meanSignedErrorMs:mean(measured.map(c=>c.answerMs-c.predictedMs))}}};
 }
 // Later directories win for a cell only when the earlier run never reached the model.
-export function mergeRuns(dirs){
+export function mergeRuns(dirs,{recoverLedgerFailures=false,audit=null}={}){
  const byCell=new Map();
+ if(audit)Object.assign(audit,{historyRuns:0,providerAttemptedRuns:0,replacements:[],analysis:recoverLedgerFailures?'infrastructure_recovery_secondary':'first_provider_attempt_preserved'});
  for(const dir of dirs)for(const f of readdirSync(dir).filter(f=>f.endsWith('.json'))){
   const r=JSON.parse(readFileSync(join(dir,f),'utf8'));const key=[r.tier,r.taskId,r.profile,r.inference.seed].join('|');const prev=byCell.get(key);
-  if(!prev||NOT_EXECUTED.has(prev.error))byCell.set(key,r);
+  if(audit){audit.historyRuns++;if(r.calls?.length)audit.providerAttemptedRuns++;}
+  if(!prev||isNotExecuted(prev)||(recoverLedgerFailures&&NOT_EXECUTED.has(prev.error))){
+   if(prev&&audit)audit.replacements.push({cell:key,previousId:prev.id,nextId:r.id,previousProviderCalls:prev.calls?.length??null,reason:isNotExecuted(prev)?'no_provider_attempt':'explicit_secondary_recovery'});
+   byCell.set(key,r);
+  }
  }
  return [...byCell.values()];
 }
 if(import.meta.url===pathToFileURL(process.argv[1]).href){
  const arg=n=>{const i=process.argv.indexOf('--'+n);return i>0?process.argv[i+1]:null;};
- const results=mergeRuns(arg('runs').split(','));const uniq=k=>[...new Set(results.map(k))].sort((a,b)=>a<b?-1:1);
- const s=summarize(results,{tiers:LADDER.filter(t=>results.some(r=>r.tier===t)),seeds:uniq(r=>r.inference.seed),profiles:uniq(r=>r.profile),tasks:uniq(r=>r.taskId),sources:arg('runs').split(','),maxTokens:results[0]?.inference.maxTokens,notExecuted:results.filter(r=>NOT_EXECUTED.has(r.error)).length});
+ const mergeAudit={};const results=mergeRuns(arg('runs').split(','),{recoverLedgerFailures:process.argv.includes('--recover-ledger-failures'),audit:mergeAudit});const uniq=k=>[...new Set(results.map(k))].sort((a,b)=>a<b?-1:1);
+ const s=summarize(results,{tiers:LADDER.filter(t=>results.some(r=>r.tier===t)),seeds:uniq(r=>r.inference.seed),profiles:uniq(r=>r.profile),tasks:uniq(r=>r.taskId),sources:arg('runs').split(','),maxTokens:results[0]?.inference.maxTokens,notExecuted:results.filter(isNotExecuted).length,mergeAudit});
  writeFileSync(arg('out'),JSON.stringify(s,null,2));console.log(JSON.stringify({byTier:s.byTier,policies:s.policies,notExecuted:s.notExecuted},null,1));
 }

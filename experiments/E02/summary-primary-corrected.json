@@ -1,11 +1,172 @@
 {
-  "generatedAt": "2026-10-28T15:22:32.475Z",
+  "generatedAt": "2026-10-28T18:34:35.235Z",
   "sources": [
     "experiments/E02/runs",
     "experiments/E02b/runs"
   ],
   "maxTokens": 8192,
   "notExecuted": 0,
+  "mergeAudit": {
+    "historyRuns": 78,
+    "providerAttemptedRuns": 56,
+    "replacements": [
+      {
+        "cell": "super|release-brief|lean|33",
+        "previousId": "2fb641e0-5ce3-45c3-85ce-6ae48792c60f",
+        "nextId": "01d9379c-8d45-4d2f-a9dc-12e5593bc55b",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|lean|33",
+        "previousId": "32846ebd-498f-44d8-85ea-9bc234b4fcc0",
+        "nextId": "0c5739f2-3090-4967-b908-0d1e01c713fa",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|shipping-function|careful|33",
+        "previousId": "05569f11-6ac0-413d-aadf-b4a9fcbcf87f",
+        "nextId": "1d5cfda2-7e70-4645-bcef-13b0e9bea226",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|invoice-cleanup|careful|33",
+        "previousId": "d5252f0e-b620-41cd-9d48-bd2fceb53889",
+        "nextId": "2293dc09-4efc-47fb-99e9-5f9cf60b95d1",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|invoice-cleanup|careful|33",
+        "previousId": "cad40283-b7c5-4d67-9315-8dd607c81266",
+        "nextId": "2b184dd5-c5fe-4fea-bed5-cfa38feec326",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|invoice-cleanup|lean|33",
+        "previousId": "77817c29-9062-42df-835f-f29de2314426",
+        "nextId": "2bfb53d1-a1b3-4b36-ab93-f259cb04a2d8",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|careful|22",
+        "previousId": "69c137f1-2606-4726-84b0-94f259d9327f",
+        "nextId": "45f2b0de-8184-4304-a4cb-4a628e2cff3f",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|release-brief|careful|33",
+        "previousId": "2cf106da-4748-4ae5-a38c-14b217d33e3b",
+        "nextId": "4c6f154f-5f41-471f-89cd-5703f83b8eeb",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|shipping-function|lean|22",
+        "previousId": "c77d218c-2b84-4b2f-b8e0-2ce3b72ea467",
+        "nextId": "524db082-3d6a-455f-bd02-a5a8c3fe5d3a",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|shipping-function|careful|33",
+        "previousId": "1bddf0e7-916a-48a6-8e7c-d15d431c1f1e",
+        "nextId": "52d9d3eb-8efd-4457-931d-d9f90432d8fb",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|shipping-function|lean|33",
+        "previousId": "67afcdf3-3d7f-450e-a94c-2be6c9c37ef9",
+        "nextId": "602e61f6-e8b2-447c-9ec3-43887087267d",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|careful|33",
+        "previousId": "6060a8ab-3c75-4a06-8323-445f05b86fcb",
+        "nextId": "60b8459c-2e7f-4c30-87ef-281acb998a33",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|release-brief|careful|33",
+        "previousId": "83e6e115-45bc-4d58-9208-4d4b84d79a99",
+        "nextId": "6f7c7816-f520-4f0c-8146-deaea4bb4fb4",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|release-brief|careful|33",
+        "previousId": "8cccc60b-2b7f-40d9-902b-ea6a0111f097",
+        "nextId": "79084ea4-014e-4187-b079-29dae967db9d",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|invoice-cleanup|lean|33",
+        "previousId": "6ea6e24b-36cd-4995-9bb5-d61b84234e61",
+        "nextId": "8470ae69-a103-46ec-bc9c-72ef07a57af8",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|shipping-function|lean|33",
+        "previousId": "d46d806c-5768-4ade-a717-045be30af397",
+        "nextId": "993a30f8-840d-46c5-b43c-c900639a2963",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|invoice-cleanup|careful|33",
+        "previousId": "a20c9863-ab2d-4242-8e58-be38f3505f56",
+        "nextId": "aa7058c5-afb7-4095-b7d2-7b16389e4c05",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|lean|22",
+        "previousId": "bf7184a4-5568-4bf9-8eda-8d8041bbca47",
+        "nextId": "b56b13fb-9f77-4ed2-9057-a1c2aa1ecd54",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|release-brief|lean|33",
+        "previousId": "ecc8280b-eb85-4fad-b2b5-9e5b3b802980",
+        "nextId": "c3dba01b-2b49-45df-ba1e-9906065129f6",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|shipping-function|lean|22",
+        "previousId": "5832d28b-8d23-4689-8e3e-e59a7cd4e83d",
+        "nextId": "c3f6a840-a41e-4f29-bf1c-add426a4a9a7",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|release-brief|lean|33",
+        "previousId": "3323cde1-c2b2-4783-9009-79b9b81fb4f7",
+        "nextId": "d4525ea7-2d4c-4607-b442-a37a8c48793a",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|invoice-cleanup|lean|33",
+        "previousId": "c7593429-8eed-405f-afc8-09d51d9eff2e",
+        "nextId": "eda93ecf-1f9c-430f-a762-1c7f230f195a",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      }
+    ],
+    "analysis": "first_provider_attempt_preserved"
+  },
   "tiers": [
     "lightning",
     "super",
@@ -30,26 +191,29 @@
       "model": "nvidia/Nemotron-3_5-Lightning",
       "runs": 18,
       "passRate": {
-        "mean": 0.6666666666666666,
-        "sd": 0.16666666666666669
+        "mean": 0.611111111111111,
+        "sd": 0.0962250448649376
       },
       "durationMs": {
-        "mean": 46591.11111111111,
-        "sd": 48673.20505635021
+        "mean": 45605.555555555555,
+        "sd": 49168.26260221386
       },
       "tokens": {
-        "mean": 16256.470588235294
+        "mean": 15712.35294117647
       },
       "costUSD": {
-        "mean": 0.0028435235294117646,
+        "mean": 0.0027532870588235295,
         "known": false,
-        "low": 0.00329302,
-        "high": 0.0035355800000000004
+        "knownRuns": 17,
+        "totalRuns": 18,
+        "low": 0.003207796666666667,
+        "high": 0.0034503566666666667
       },
-      "throughputTokS": 264.3333333333333,
+      "throughputTokS": 259.7487568699293,
       "errors": [
         "incomplete_response",
         "step_limit",
+        "token_budget_overrun",
         "step_limit",
         "run_timeout"
       ]
@@ -62,21 +226,23 @@
         "sd": 0.16666666666666669
       },
       "durationMs": {
-        "mean": 19439,
-        "sd": 22065.99615858274
+        "mean": 15329.944444444445,
+        "sd": 15372.462367234019
       },
       "tokens": {
-        "mean": 6758.833333333333
+        "mean": 5336.333333333333
       },
       "costUSD": {
-        "mean": 0.0037417500000000003,
+        "mean": 0.002939233333333333,
         "known": true,
-        "low": 0.0037417500000000003,
-        "high": 0.0037417500000000003
+        "knownRuns": 18,
+        "totalRuns": 18,
+        "low": 0.002939233333333333,
+        "high": 0.002939233333333333
       },
-      "throughputTokS": 125,
+      "throughputTokS": 117.28669774849408,
       "errors": [
-        "step_limit",
+        "token_budget_overrun",
         "step_limit"
       ]
     },
@@ -97,6 +263,8 @@
       "costUSD": {
         "mean": 0.006115666666666666,
         "known": true,
+        "knownRuns": 18,
+        "totalRuns": 18,
         "low": 0.006115666666666666,
         "high": 0.006115666666666666
       },
@@ -107,15 +275,19 @@
   "policies": {
     "ladder": {
       "passRate": {
-        "mean": 0.888888888888889,
-        "sd": 0.0962250448649376
+        "mean": 0.8333333333333334,
+        "sd": 0
       },
-      "costUSD": 0.004134211764705882,
-      "costKnownCells": 17,
-      "costUSDLow": 0.005863853333333333,
-      "costUSDHigh": 0.006106413333333333,
-      "durationMs": 55051.27777777778,
-      "durationMsMedian": 32187.5,
+      "costUSD": 0.004043975294117647,
+      "costCoverage": {
+        "knownCells": 17,
+        "totalCells": 18,
+        "complete": false
+      },
+      "costUSDLow": 0.00577863,
+      "costUSDHigh": 0.006021189999999999,
+      "durationMs": 54065.72222222222,
+      "durationMsMedian": 30790.5,
       "durationMsMax": 261270,
       "cells": 18
     },
@@ -125,7 +297,11 @@
         "sd": 0.09622504486493767
       },
       "costUSD": 0.006115666666666667,
-      "costKnownCells": 18,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
       "costUSDLow": 0.006115666666666667,
       "costUSDHigh": 0.006115666666666667,
       "durationMs": 7183.333333333333,
@@ -138,26 +314,34 @@
         "mean": 0.6666666666666666,
         "sd": 0.16666666666666669
       },
-      "costUSD": 0.00374175,
-      "costKnownCells": 18,
-      "costUSDLow": 0.00374175,
-      "costUSDHigh": 0.00374175,
-      "durationMs": 19439,
-      "durationMsMedian": 12838,
-      "durationMsMax": 83165,
+      "costUSD": 0.002939233333333334,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
+      "costUSDLow": 0.002939233333333334,
+      "costUSDHigh": 0.002939233333333334,
+      "durationMs": 15329.944444444445,
+      "durationMsMedian": 12417,
+      "durationMsMax": 75909,
       "cells": 18
     },
     "speculative": {
       "passRate": {
-        "mean": 0.888888888888889,
-        "sd": 0.0962250448649376
+        "mean": 0.8333333333333334,
+        "sd": 0
       },
-      "costUSD": 0.006452594117647058,
-      "costKnownCells": 17,
-      "costUSDLow": 0.008053436666666667,
-      "costUSDHigh": 0.008295996666666666,
-      "durationMs": 25433.11111111111,
-      "durationMsMedian": 14233.5,
+      "costUSD": 0.0055126341176470585,
+      "costCoverage": {
+        "knownCells": 17,
+        "totalCells": 18,
+        "complete": false
+      },
+      "costUSDLow": 0.0071656966666666655,
+      "costUSDHigh": 0.007408256666666665,
+      "durationMs": 24447.555555555555,
+      "durationMsMedian": 14076,
       "durationMsMax": 185361,
       "cells": 18
     },
@@ -167,7 +351,11 @@
         "sd": 0.0962250448649376
       },
       "costUSD": 0.004362969411764706,
-      "costKnownCells": 17,
+      "costCoverage": {
+        "knownCells": 17,
+        "totalCells": 18,
+        "complete": false
+      },
       "costUSDLow": 0.006079902222222222,
       "costUSDHigh": 0.0063224622222222224,
       "durationMs": 46140.38888888889,
@@ -177,15 +365,19 @@
     },
     "ladder_on_memory_cells": {
       "passRate": {
-        "mean": 0.888888888888889,
-        "sd": 0.0962250448649376
+        "mean": 0.8333333333333334,
+        "sd": 0
       },
-      "costUSD": 0.004134211764705882,
-      "costKnownCells": 17,
-      "costUSDLow": 0.005863853333333333,
-      "costUSDHigh": 0.006106413333333333,
-      "durationMs": 55051.27777777778,
-      "durationMsMedian": 32187.5,
+      "costUSD": 0.004043975294117647,
+      "costCoverage": {
+        "knownCells": 17,
+        "totalCells": 18,
+        "complete": false
+      },
+      "costUSDLow": 0.00577863,
+      "costUSDHigh": 0.006021189999999999,
+      "durationMs": 54065.72222222222,
+      "durationMsMedian": 30790.5,
       "durationMsMax": 261270,
       "cells": 18
     },
@@ -195,13 +387,49 @@
         "sd": 0.09622504486493767
       },
       "costUSD": 0.006115666666666667,
-      "costKnownCells": 18,
+      "costCoverage": {
+        "knownCells": 18,
+        "totalCells": 18,
+        "complete": true
+      },
       "costUSDLow": 0.006115666666666667,
       "costUSDHigh": 0.006115666666666667,
       "durationMs": 7183.333333333333,
       "durationMsMedian": 4762.5,
       "durationMsMax": 17033,
       "cells": 18
+    }
+  },
+  "pairedCostComparisons": {
+    "ladder_vs_always_ultra": {
+      "knownPairs": 17,
+      "totalCells": 18,
+      "ladderMeanUSD": 0.004043975294117647,
+      "controlMeanUSD": 0.0059604705882352945,
+      "deltaMeanUSD": -0.0019164952941176476,
+      "relativeSaving": 0.321534225485552,
+      "excludedCells": [
+        {
+          "seed": 11,
+          "task": "shipping-function",
+          "profile": "careful"
+        }
+      ]
+    },
+    "ladder_vs_always_super": {
+      "knownPairs": 17,
+      "totalCells": 18,
+      "ladderMeanUSD": 0.004043975294117647,
+      "controlMeanUSD": 0.0021957,
+      "deltaMeanUSD": 0.0018482752941176468,
+      "relativeSaving": -0.8417704122228205,
+      "excludedCells": [
+        {
+          "seed": 11,
+          "task": "shipping-function",
+          "profile": "careful"
+        }
+      ]
     }
   },
   "cells": [
@@ -461,17 +689,17 @@
       "seed": 22,
       "task": "shipping-function",
       "profile": "careful",
-      "chosenTier": "lightning",
+      "chosenTier": null,
       "path": [
         "lightning"
       ],
       "speculative": {
-        "chosenTier": "lightning",
+        "chosenTier": null,
         "path": [
           "lightning",
           "super"
         ],
-        "durationMs": 31760
+        "durationMs": 14020
       },
       "memory": {
         "startTier": "ultra",

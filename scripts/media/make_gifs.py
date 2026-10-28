@@ -117,6 +117,7 @@ def policy_bars(summary, out):
     pol = summary.get("policies") or {}
     if "ladder" not in pol:
         return
+    # Costs are the bounds over every cell (cost_range); the matched-cell means in pairedCostComparisons are a sensitivity check only.
     rows = [("Always Ultra", pol["always_ultra"]), ("Always Super", pol["always_super"]), ("Auto-tier ladder", pol["ladder"])]
     fig, ax = plt.subplots(figsize=(10, 3.6), dpi=100, facecolor=BG)
     fig.subplots_adjust(left=0.17, right=0.98)
@@ -166,7 +167,7 @@ def experiments_bars(rows, out):
         axes[0].set_title("Tasks passed", fontsize=11, color=INK, loc="left"); axes[1].set_title("Cost per task (US$)", fontsize=11, color=INK, loc="left")
         fig.suptitle("Auto-tier ladder (green) vs always Nemotron 3 Ultra (grey), every complete pre-registered experiment", fontsize=11.5, color=INK, x=0.07, ha="left")
 
-    fig.text(0.07, 0.04, "The ladder passed more tasks every time; its cost did not hold up. E02 cost corrected for one cell with unknown usage (erratum in experiments/LOG.md).", fontsize=9, color=MUTED)
+    fig.text(0.07, 0.04, "The ladder passed more tasks every time; its cost did not hold up. E02 keeps first provider attempts; costs are bounds where a call lost its usage.", fontsize=9, color=MUTED)
     anim = FuncAnimation(fig, draw, frames=frames, interval=80)
     anim.save(out / "experiments.gif", writer=PillowWriter(fps=12))
     plt.close(fig)

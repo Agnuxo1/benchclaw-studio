@@ -2,7 +2,7 @@
 
 This is the project story submitted to the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents). Video: VIDEO_URL · Demo: https://agnuxo1.github.io/benchclaw-studio/
 
-*Updated on 2026-10-28: two more pre-registered experiments (E03, E04), a call-timeout fix found by measurement, and a correction. We first reported a 33% cost saving for the ladder in E02, but that figure left out one cell whose cost was unknown. See "Challenges".*
+*Updated on 2026-10-28: two more pre-registered experiments (E03, E04), a call-timeout fix found by measurement, and two corrections. For E02 we first reported 89% of tasks passed at a 33% cost saving. The cost left out one cell whose cost was unknown, and the pass rate counted reruns that our pre-registered rule does not allow. See "Challenges".*
 
 ## Inspiration
 
@@ -17,19 +17,19 @@ BenchClaw Studio runs real agent tasks on **NVIDIA Nemotron through Nebius Token
 3. **Auto-tier ladder.** Nemotron 3.5 Lightning goes first. If its output fails the checks, the task escalates to Nemotron 3 Super, then to Nemotron 3 Ultra, and stops at the first tier that passes.
 4. **Evidence, not vibes.** Each run records its actions, artifact, check results, Nebius request IDs, provider-reported tokens, latency and cost. The report can be exported with SHA-256 digests and its checks recomputed offline.
 
-## Results: 176 live runs on Token Factory, four pre-registered experiments
+## Results: 182 runs on Token Factory, four pre-registered experiments
 
-Each grid has 3 tasks × 2 agent profiles × 3 seeds × 3 Nemotron tiers. Hypotheses, decision rules and stopping rules were committed with a SHA-256 hash before the first call of each experiment.
+Each grid has 3 tasks × 2 agent profiles × 3 seeds × 3 Nemotron tiers. Hypotheses, decision rules and stopping rules were committed with a SHA-256 hash before the first call of each experiment. The tasks are controlled synthetic fixtures, so these are measurements on these tasks, not a general ranking of the models.
 
 | Auto-tier ladder vs always Ultra | E01 (2,048 output tokens) | E02 (8,192) | E04 (8,192, fresh grid) |
 | --- | --- | --- | --- |
-| Tasks passed | **83% vs 67%** | **89% vs 78%** | **94% vs 89%** |
-| Cost per task | $0.0051 vs $0.0078 (−34%) | $0.0059–0.0061 vs $0.0061 (about even) | $0.0073–0.0078 vs $0.0059 (+24% to +32%) |
-| Mean time per task | 33 s vs 6 s | 55 s vs 7 s | 71 s vs 5 s |
+| Tasks passed | **83% vs 67%** | **83% vs 78%** | **94% vs 89%** |
+| Cost per task | $0.0051 vs $0.0078 (−34%) | $0.0058–0.0060 vs $0.0061 (−1.5% to −5.5%) | $0.0073–0.0078 vs $0.0059 (+24% to +32%) |
+| Mean time per task | 33 s vs 6 s | 54 s vs 7 s | 71 s vs 5 s |
 
 - **The ladder passed more tasks than always using Ultra in every experiment.** Super and Ultra fail on *different* tasks, so escalating on failed checks gets the best of both.
 - **Its cost advantage did not hold up.** It went from 34% cheaper to up to 32% dearer, because every failed cheap attempt is paid for. That is exactly why a team should measure its own tasks before choosing a policy, and why Studio exists.
-- **Reasoning models need room.** With a 2,048-token output budget, Nemotron 3.5 Lightning ran out of tokens while thinking in 17 of 18 runs. At 8,192 tokens it passed 67%, and 8,192 is now the default.
+- **Reasoning models need room.** With a 2,048-token output budget, Nemotron 3.5 Lightning ran out of tokens while thinking in 17 of 18 runs. At 8,192 tokens it passed 61%, and 8,192 is now the default.
 - **Ultra is the fastest tier per task**, at 5–7 s, because it needs the fewest turns and tokens.
 - **Two latency policies were tested in E04, and both missed their pre-registered 30 s target.** The speculative ladder (Lightning and Super together) halved the ladder's time, but it cost more than Ultra, so it was rejected and is not offered. Tier memory (start where the task last passed) kept the 94% pass rate in 34 s, at $0.0050 per task. That made it the cheapest policy at that pass rate, but it was also rejected on time, so it is our next experiment.
 - The whole study cost about **$0.72** in Token Factory usage.
@@ -46,8 +46,8 @@ Each grid has 3 tasks × 2 agent profiles × 3 seeds × 3 Nemotron tiers. Hypoth
 ## Challenges we ran into
 
 - **Reasoning budgets.** Reasoning tiers spend output tokens on thinking. With our original 2,048-token budget, Lightning reached `finish_reason=length` before it wrote its answer. We kept that result (E01) and pre-registered a one-variable follow-up (E02).
-- **Provider throughput changes within a day.** In E03, Lightning's served throughput fell from 264 to 78 tokens/s within one afternoon. An 8,192-token call no longer fit our fixed 45 s per-call timeout, so the aborted call returned no usage. Our own fail-closed token ledger then stopped the experiment twice, and only 4 of 18 cells finished. We fixed the cause (a call may now use the run's remaining time) and gave each benchmark run its own ledger. E04 confirmed the fix, pre-registered as H11: 54 of 54 runs, with no provider timeouts.
-- **We found a mistake in our own headline.** We had reported the E02 ladder as 33% cheaper than always-Ultra. That average left out one cell whose last call returned no usage. With every cell counted, as low–high bounds, the saving is 0.2% to 4%. An independent review by Codex, during E04's pre-registration, led us to it. The correction is in the open log, and every cost decision now counts unknown costs against the hypothesis.
+- **Provider throughput changes within a day.** In E03, Lightning's served throughput fell from 264 to 78 tokens/s within one afternoon. An 8,192-token call no longer fit our fixed 45 s per-call timeout, so the aborted call returned no usage. Our own fail-closed token ledger then stopped the experiment twice, and only 5 of 18 cells finished. We fixed the cause (a call may now use the run's remaining time) and gave each benchmark run its own ledger. E04 confirmed the fix, pre-registered as H11: 54 of 54 runs, with no provider timeouts.
+- **We found two mistakes in our own headline.** We had reported the E02 ladder as passing 89% of tasks at 33% lower cost than always-Ultra. First, the cost average left out one cell whose last call returned no usage. That was the most expensive cell: the provider reported at least $0.0353 of ladder spend in it, against $0.0088 for Ultra. An independent review by Codex, during E04's pre-registration, led us to it. Second, an independent reanalysis found that two runs stopped by our ledger had already called the model, and we had replaced them with reruns. Our pre-registered rule keeps such runs. With both fixed, the E02 ladder passes 83% (vs 78%) and is 1.5% to 5.5% cheaper. Both corrections are in the open log. The rerun analysis stays public as a labelled secondary result, and every cost decision now counts unknown costs against the hypothesis.
 
 ## Accomplishments that we're proud of
 

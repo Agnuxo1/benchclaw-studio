@@ -1,0 +1,482 @@
+{
+  "generatedAt": "2026-10-28T18:34:35.513Z",
+  "sources": [
+    "experiments/E03/runs",
+    "experiments/E03b/runs"
+  ],
+  "maxTokens": 8192,
+  "notExecuted": 38,
+  "mergeAudit": {
+    "historyRuns": 65,
+    "providerAttemptedRuns": 18,
+    "replacements": [
+      {
+        "cell": "lightning|shipping-function|lean|11",
+        "previousId": "e992da8b-3dcb-493d-aed8-2da2e591c3e9",
+        "nextId": "01a90fbd-13d7-40e4-9532-8b27d334c3f2",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|shipping-function|careful|11",
+        "previousId": "7f3f51b1-9640-4187-8b78-272ca546b46e",
+        "nextId": "129c728f-910a-4d03-9fd7-45d6db421368",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|careful|11",
+        "previousId": "4adc80bb-0400-40fb-9ee5-cb7bf969e7ed",
+        "nextId": "15fa50fb-59fb-4006-a239-9903d6a81fc3",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|shipping-function|lean|11",
+        "previousId": "97306f90-af78-4fbd-935b-6da9c830a0a2",
+        "nextId": "259081a1-94c8-494b-a35e-98bdbdb73b69",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "lightning|invoice-cleanup|lean|11",
+        "previousId": "b99a7bdb-433a-4a8d-a8cb-53684391fe1a",
+        "nextId": "34c789a0-d638-4c9a-8f08-194bf6fa0483",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|invoice-cleanup|lean|11",
+        "previousId": "44557877-6336-4f4b-89e6-902cfac5b24a",
+        "nextId": "62da595c-26a7-41f7-83c9-b928ace398cd",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|invoice-cleanup|lean|11",
+        "previousId": "449a6028-b4bb-4b91-a3fe-ead6a8378a11",
+        "nextId": "7ec989a3-06ea-4307-ab7d-4b59affeb2ee",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "super|shipping-function|careful|11",
+        "previousId": "4bfa3ce6-2130-414e-adea-0df9c64b71d6",
+        "nextId": "8e46fa86-6678-4c16-837e-238bca22e427",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      },
+      {
+        "cell": "ultra|shipping-function|lean|11",
+        "previousId": "4d03c7af-aebb-4a8c-9701-e1c196b39933",
+        "nextId": "e862564d-c817-41e2-8704-28a4108fb0f7",
+        "previousProviderCalls": 0,
+        "reason": "no_provider_attempt"
+      }
+    ],
+    "analysis": "first_provider_attempt_preserved"
+  },
+  "tiers": [
+    "lightning",
+    "super",
+    "ultra"
+  ],
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "profiles": [
+    "careful",
+    "lean"
+  ],
+  "tasks": [
+    "invoice-cleanup",
+    "release-brief",
+    "shipping-function"
+  ],
+  "byTier": {
+    "lightning": {
+      "model": "nvidia/Nemotron-3_5-Lightning",
+      "runs": 6,
+      "passRate": {
+        "mean": 0.16666666666666666,
+        "sd": null
+      },
+      "durationMs": {
+        "mean": 49012.333333333336,
+        "sd": 31205.65056310582
+      },
+      "tokens": {
+        "mean": 6914
+      },
+      "costUSD": {
+        "mean": 0.0013576799999999998,
+        "known": false,
+        "knownRuns": 4,
+        "totalRuns": 6,
+        "low": 0.0010379699999999998,
+        "high": 0.0024933299999999998
+      },
+      "throughputTokS": 119.88304093567251,
+      "errors": [
+        "token_accounting_unknown",
+        "provider_timeout",
+        "token_accounting_unknown",
+        "provider_timeout",
+        "token_accounting_unknown"
+      ]
+    },
+    "super": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "runs": 5,
+      "passRate": {
+        "mean": 0.6,
+        "sd": null
+      },
+      "durationMs": {
+        "mean": 11377,
+        "sd": 2035.113756034291
+      },
+      "tokens": {
+        "mean": 3624.4
+      },
+      "costUSD": {
+        "mean": 0.00199344,
+        "known": true,
+        "knownRuns": 5,
+        "totalRuns": 5,
+        "low": 0.00199344,
+        "high": 0.00199344
+      },
+      "throughputTokS": 84.48844884488449,
+      "errors": []
+    },
+    "ultra": {
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "runs": 5,
+      "passRate": {
+        "mean": 0.6,
+        "sd": null
+      },
+      "durationMs": {
+        "mean": 4890.2,
+        "sd": 3123.318379544423
+      },
+      "tokens": {
+        "mean": 2982.8
+      },
+      "costUSD": {
+        "mean": 0.0051044,
+        "known": true,
+        "knownRuns": 5,
+        "totalRuns": 5,
+        "low": 0.0051044,
+        "high": 0.0051044
+      },
+      "throughputTokS": 145.10299740964598,
+      "errors": [
+        "token_accounting_unknown"
+      ]
+    }
+  },
+  "policies": {
+    "ladder": {
+      "passRate": {
+        "mean": 0.6,
+        "sd": null
+      },
+      "costUSD": 0.0017709999999999998,
+      "costCoverage": {
+        "knownCells": 3,
+        "totalCells": 5,
+        "complete": false
+      },
+      "costUSDLow": 0.0031466999999999997,
+      "costUSDHigh": 0.004893132,
+      "durationMs": 63725.8,
+      "durationMsMedian": 71674,
+      "durationMsMax": 93382,
+      "cells": 5
+    },
+    "always_ultra": {
+      "passRate": {
+        "mean": 0.6,
+        "sd": null
+      },
+      "costUSD": 0.0051044,
+      "costCoverage": {
+        "knownCells": 5,
+        "totalCells": 5,
+        "complete": true
+      },
+      "costUSDLow": 0.0051044,
+      "costUSDHigh": 0.0051044,
+      "durationMs": 4890.2,
+      "durationMsMedian": 3467,
+      "durationMsMax": 9879,
+      "cells": 5
+    },
+    "always_super": {
+      "passRate": {
+        "mean": 0.6,
+        "sd": null
+      },
+      "costUSD": 0.00199344,
+      "costCoverage": {
+        "knownCells": 5,
+        "totalCells": 5,
+        "complete": true
+      },
+      "costUSDLow": 0.00199344,
+      "costUSDHigh": 0.00199344,
+      "durationMs": 11377,
+      "durationMsMedian": 11582,
+      "durationMsMax": 13892,
+      "cells": 5
+    },
+    "speculative": {
+      "passRate": {
+        "mean": 1,
+        "sd": null
+      },
+      "costUSD": 0.0034146000000000003,
+      "costCoverage": {
+        "knownCells": 3,
+        "totalCells": 5,
+        "complete": false
+      },
+      "costUSDLow": 0.00413286,
+      "costUSDHigh": 0.005879292,
+      "durationMs": 26564.8,
+      "durationMsMedian": 13892,
+      "durationMsMax": 58987,
+      "cells": 5
+    },
+    "tier_memory": {
+      "passRate": {
+        "mean": 0.6,
+        "sd": null
+      },
+      "costUSD": 0.0017709999999999998,
+      "costCoverage": {
+        "knownCells": 3,
+        "totalCells": 5,
+        "complete": false
+      },
+      "costUSDLow": 0.0031466999999999997,
+      "costUSDHigh": 0.004893132,
+      "durationMs": 63725.8,
+      "durationMsMedian": 71674,
+      "durationMsMax": 93382,
+      "cells": 5
+    },
+    "ladder_on_memory_cells": {
+      "passRate": {
+        "mean": 0.6,
+        "sd": null
+      },
+      "costUSD": 0.0017709999999999998,
+      "costCoverage": {
+        "knownCells": 3,
+        "totalCells": 5,
+        "complete": false
+      },
+      "costUSDLow": 0.0031466999999999997,
+      "costUSDHigh": 0.004893132,
+      "durationMs": 63725.8,
+      "durationMsMedian": 71674,
+      "durationMsMax": 93382,
+      "cells": 5
+    },
+    "always_ultra_on_memory_cells": {
+      "passRate": {
+        "mean": 0.6,
+        "sd": null
+      },
+      "costUSD": 0.0051044,
+      "costCoverage": {
+        "knownCells": 5,
+        "totalCells": 5,
+        "complete": true
+      },
+      "costUSDLow": 0.0051044,
+      "costUSDHigh": 0.0051044,
+      "durationMs": 4890.2,
+      "durationMsMedian": 3467,
+      "durationMsMax": 9879,
+      "cells": 5
+    }
+  },
+  "pairedCostComparisons": {
+    "ladder_vs_always_ultra": {
+      "knownPairs": 3,
+      "totalCells": 5,
+      "ladderMeanUSD": 0.0017709999999999998,
+      "controlMeanUSD": 0.0037386666666666666,
+      "deltaMeanUSD": -0.001967666666666667,
+      "relativeSaving": 0.5263017118402282,
+      "excludedCells": [
+        {
+          "seed": 11,
+          "task": "release-brief",
+          "profile": "careful"
+        },
+        {
+          "seed": 11,
+          "task": "shipping-function",
+          "profile": "careful"
+        }
+      ]
+    },
+    "ladder_vs_always_super": {
+      "knownPairs": 3,
+      "totalCells": 5,
+      "ladderMeanUSD": 0.0017709999999999998,
+      "controlMeanUSD": 0.0016436000000000003,
+      "deltaMeanUSD": 0.00012739999999999952,
+      "relativeSaving": -0.0775127768313455,
+      "excludedCells": [
+        {
+          "seed": 11,
+          "task": "release-brief",
+          "profile": "careful"
+        },
+        {
+          "seed": 11,
+          "task": "shipping-function",
+          "profile": "careful"
+        }
+      ]
+    }
+  },
+  "cells": [
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "careful",
+      "chosenTier": null,
+      "path": [
+        "lightning"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 8936
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": null,
+        "path": [
+          "lightning"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "invoice-cleanup",
+      "profile": "lean",
+      "chosenTier": null,
+      "path": [
+        "lightning"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 9788
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": null,
+        "path": [
+          "lightning"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "careful",
+      "chosenTier": "ultra",
+      "path": [
+        "lightning",
+        "super",
+        "ultra"
+      ],
+      "speculative": {
+        "chosenTier": "ultra",
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ],
+        "durationMs": 58987
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "ultra",
+        "path": [
+          "lightning",
+          "super",
+          "ultra"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "release-brief",
+      "profile": "lean",
+      "chosenTier": "lightning",
+      "path": [
+        "lightning"
+      ],
+      "speculative": {
+        "chosenTier": "lightning",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 41221
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "lightning",
+        "path": [
+          "lightning"
+        ]
+      }
+    },
+    {
+      "seed": 11,
+      "task": "shipping-function",
+      "profile": "careful",
+      "chosenTier": "super",
+      "path": [
+        "lightning",
+        "super"
+      ],
+      "speculative": {
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ],
+        "durationMs": 13892
+      },
+      "memory": {
+        "startTier": "lightning",
+        "chosenTier": "super",
+        "path": [
+          "lightning",
+          "super"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "sources": [
+    "experiments/E01/runs",
+    "experiments/E02/runs",
+    "experiments/E02b/runs"
+  ],
+  "totalStoredRecords": 132,
+  "providerAttemptedRuns": 110,
+  "ledgerOnlyRecords": 22,
+  "knownCostAttemptedRuns": 109,
+  "unknownCostAttemptedRuns": 1,
+  "knownEstimatedCostUSD": 0.43173212000000005,
+  "costBasis": "Recorded provider tokens times recorded catalogue prices; unknown usage is excluded, not zero and not a final invoice.",
+  "attemptedLedgerFailures": [
+    {
+      "id": "250de429-a1f9-4fd9-89ef-90c41cb6effe",
+      "tier": "super",
+      "task": "shipping-function",
+      "profile": "careful",
+      "seed": 22,
+      "calls": 3,
+      "cost": 0.0017919
+    },
+    {
+      "id": "5423950b-2561-46dc-856b-df558d5246f1",
+      "tier": "lightning",
+      "task": "shipping-function",
+      "profile": "careful",
+      "seed": 22,
+      "calls": 2,
+      "cost": 0.0009021599999999999
+    }
+  ]
+}
