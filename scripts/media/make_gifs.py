@@ -77,7 +77,8 @@ def tier_bars(summary, out):
     metrics = [("Tasks passed", lambda b: 100 * (b["passRate"]["mean"] or 0), lambda b: 100 * (b["passRate"]["sd"] or 0), "{:.0f}%"),
                ("Mean run time (s)", lambda b: (b["durationMs"]["mean"] or 0) / 1000, lambda b: (b["durationMs"]["sd"] or 0) / 1000, "{:.1f}s"),
                ("Cost per run (US$)", lambda b: b["costUSD"]["mean"] or 0, lambda b: 0, "${:.4f}")]
-    fig, axes = plt.subplots(1, 3, figsize=(11, 4.2), dpi=100, facecolor=BG)
+    fig, axes = plt.subplots(1, 3, figsize=(11, 4.4), dpi=100, facecolor=BG)
+    fig.subplots_adjust(bottom=0.16, wspace=0.28)
     frames = 24
 
     def draw(i):
@@ -89,13 +90,13 @@ def tier_bars(summary, out):
             vals = [val(by[t[0]]) for t in tiers]; errs = [err(by[t[0]]) for t in tiers]
             colors = [LIME, GREEN, "#4f7f12"]
             ax.bar(range(len(tiers)), [v * f for v in vals], color=colors[:len(tiers)], width=0.62, yerr=[e * f for e in errs] if any(errs) else None, ecolor=MUTED, capsize=4)
-            top = max(vals + [1e-9]) * 1.25
+            top = max([v + e for v, e in zip(vals, errs)] + [1e-9]) * 1.18
             ax.set_ylim(0, top); ax.set_yticks([])
             ax.set_xticks(range(len(tiers))); ax.set_xticklabels([t[1].replace("Nemotron ", "") for t in tiers], fontsize=9.5)
             ax.set_title(title, fontsize=11.5, color=INK, pad=10)
-            for k, v in enumerate(vals):
-                ax.text(k, v * f + top * 0.03, fmt.format(v * f), ha="center", fontsize=10, color=INK, weight="bold")
-        fig.suptitle(f"E01 · {summary['tokenLedger'] and ''}{len(summary['seeds'])} seeds × {len(summary['tasks'])} tasks × {len(summary['profiles'])} profiles per tier · real Nebius Token Factory runs", fontsize=10, color=MUTED, y=0.02)
+            for k, (v, e) in enumerate(zip(vals, errs)):
+                ax.text(k + 0.33, v * f + top * 0.02, fmt.format(v * f), ha="left", fontsize=10, color=INK, weight="bold")
+        fig.suptitle(f"{summary.get('label', 'E01')} · {len(summary['seeds'])} seeds × {len(summary['tasks'])} tasks × {len(summary['profiles'])} profiles per tier · real Nebius Token Factory runs", fontsize=10, color=MUTED, y=0.03)
 
     anim = FuncAnimation(fig, draw, frames=frames, interval=80)
     anim.save(out / "tiers.gif", writer=PillowWriter(fps=12))
@@ -108,6 +109,7 @@ def policy_bars(summary, out):
         return
     rows = [("Always Ultra", pol["always_ultra"]), ("Always Super", pol["always_super"]), ("Auto-tier ladder", pol["ladder"])]
     fig, ax = plt.subplots(figsize=(10, 3.6), dpi=100, facecolor=BG)
+    fig.subplots_adjust(left=0.17, right=0.98)
     frames = 26
     maxc = max((r[1]["costUSD"] or 0) for r in rows) * 1.35 or 1
 
@@ -127,11 +129,42 @@ def policy_bars(summary, out):
     plt.close(fig)
 
 
+def budget_bars(base, alt, out):
+    """Pass rate per tier at two output-token budgets (E01 vs E02), grouped bars with seed SD."""
+    tiers = [t for t in TIERS if t[0] in base["byTier"] and t[0] in alt["byTier"]]
+    labels = [f"{base.get('maxTokens') or 2048:,} output tokens", f"{alt.get('maxTokens'):,} output tokens"]
+    fig, ax = plt.subplots(figsize=(10, 4.2), dpi=100, facecolor=BG)
+    frames = 26
+
+    def draw(i):
+        f = 1 - (1 - min(1, (i + 1) / (frames - 6))) ** 3
+        ax.clear(); ax.set_facecolor(BG)
+        for s in ax.spines.values(): s.set_visible(False)
+        for j, (summ, color) in enumerate(((base, MUTED), (alt, GREEN))):
+            vals = [100 * summ["byTier"][t[0]]["passRate"]["mean"] for t in tiers]
+            errs = [100 * (summ["byTier"][t[0]]["passRate"]["sd"] or 0) for t in tiers]
+            xs = [k + (j - 0.5) * 0.36 for k in range(len(tiers))]
+            ax.bar(xs, [v * f for v in vals], width=0.34, color=color, yerr=[e * f for e in errs], ecolor=INK, capsize=3, label=labels[j])
+            for x, v, e in zip(xs, vals, errs):
+                ax.text(x, (v + e) * f + 3, f"{v * f:.0f}%", ha="center", fontsize=10, color=INK, weight="bold")
+        ax.set_ylim(0, 130); ax.set_yticks([]); ax.set_xticks(range(len(tiers))); ax.set_xticklabels([t[1] for t in tiers], fontsize=10.5)
+        ax.legend(frameon=False, labelcolor=INK, loc="upper left", fontsize=9.5, ncol=2)
+        ax.set_title("Tasks passed per tier: reasoning models need room to answer", fontsize=12, color=INK, loc="left")
+
+    anim = FuncAnimation(fig, draw, frames=frames, interval=80)
+    anim.save(out / "budget.gif", writer=PillowWriter(fps=12))
+    plt.close(fig)
+
+
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(); ap.add_argument("--summary"); ap.add_argument("--out", default="docs/media")
+    ap = argparse.ArgumentParser(); ap.add_argument("--summary"); ap.add_argument("--compare"); ap.add_argument("--out", default="docs/media")
+    ap.add_argument("--no-architecture", action="store_true"); ap.add_argument("--label")
     a = ap.parse_args(); out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
-    architecture(out)
+    if not a.no_architecture:
+        architecture(out)
     if a.summary:
-        s = json.loads(Path(a.summary).read_text(encoding="utf8"))
+        s = json.loads(Path(a.summary).read_text(encoding="utf8")); s["label"] = a.label or s.get("label", "E01")
         tier_bars(s, out); policy_bars(s, out)
+        if a.compare:
+            budget_bars(s, json.loads(Path(a.compare).read_text(encoding="utf8")), out)
     print("written", sorted(p.name for p in out.glob("*.gif")))

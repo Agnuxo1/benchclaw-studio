@@ -15,6 +15,6 @@ test('Reported tokens reconcile; unknown usage and overruns block further calls'
 test('Disabled budget makes no provider request; failed transport blocks future admissions',async()=>{
  let calls=0;const zero=new TokenBudget(0);const client=new NebiusClient(async()=>'synthetic-only','nvidia/test',async()=>{calls++;},zero);
  await assert.rejects(client.complete([]),/token_budget_exhausted/);assert.equal(calls,0);
- const budget=new TokenBudget(10000);const failed=new NebiusClient(async()=>'synthetic-only','nvidia/test',async()=>{calls++;throw new Error('network_error');},budget);
+ const budget=new TokenBudget(20000);const failed=new NebiusClient(async()=>'synthetic-only','nvidia/test',async()=>{calls++;throw new Error('network_error');},budget);
  await assert.rejects(failed.complete([]),/network_error/);await assert.rejects(failed.complete([]),/token_accounting_unknown/);assert.equal(calls,1);
 });
