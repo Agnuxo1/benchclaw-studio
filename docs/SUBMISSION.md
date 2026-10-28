@@ -2,7 +2,7 @@
 
 This is the project story submitted to the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents). Video: VIDEO_URL · Demo: https://agnuxo1.github.io/benchclaw-studio/
 
-*Updated on 2026-10-29: two more pre-registered experiments (E03, E04), a call-timeout fix found by measurement, and a correction. We first reported a 33% cost saving for the ladder in E02, but that figure left out one cell whose cost was unknown. See "Challenges".*
+*Updated on 2026-10-28: two more pre-registered experiments (E03, E04), a call-timeout fix found by measurement, and a correction. We first reported a 33% cost saving for the ladder in E02, but that figure left out one cell whose cost was unknown. See "Challenges".*
 
 ## Inspiration
 
