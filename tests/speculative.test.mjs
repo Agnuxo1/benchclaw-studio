@@ -70,3 +70,11 @@ test('A provider call may use the run remaining time instead of a fixed 45 s',as
  const legacy=[];await new NebiusClient(async()=>'k',MODELS.super.id,async(u,b,o)=>{legacy.push(o.timeoutMs);return {choices:[{message:{content:'{}'},finish_reason:'stop'}],usage:{prompt_tokens:1,completion_tokens:1,total_tokens:2}};}).complete([]);
  assert.deepEqual(legacy,[undefined]);
 });
+test('A call cut at the run limit is reported as run_timeout, not provider_timeout',async()=>{
+ const {makeRun,executeRun}=await import('../server/engine.mjs');const {NebiusClient}=await import('../server/nebius.mjs');const {ProviderError}=await import('../server/http.mjs');
+ // Honours both the per-call timeout and the abort signal, like server/http.mjs.
+ const transport=(url,b,{signal,timeoutMs})=>new Promise((res,rej)=>{const t=setTimeout(()=>rej(new ProviderError('provider_timeout')),timeoutMs);signal?.addEventListener('abort',()=>{clearTimeout(t);rej(new ProviderError('cancelled'));},{once:true});});
+ const run=makeRun('invoice-cleanup','lean',tools,'o',MODELS.lightning.id);run.limits.timeoutMs=60;
+ await executeRun(run,new NebiusClient(async()=>'synthetic-test-key',MODELS.super.id,transport));
+ assert.equal(run.status,'error');assert.equal(run.error,'run_timeout');
+});
