@@ -20,13 +20,48 @@ Run real agent tasks on NVIDIA Nemotron through **Nebius Token Factory**, let de
 
 > **Nebius × NVIDIA Global AI Hackathon entry** (Best Apps and Agents). Devpost confirmed submission 1269138 on 28 October 2026. That is a submission receipt, not a judging result. The submitted commit is tagged `submitted-20261028`; later updates, made before the edit deadline, are recorded in [`experiments/LOG.md`](experiments/LOG.md).
 
+**Contents** — [Why](#why) · [Background](#background) · [What it does](#what-it-does) · [Results](#results) · [How NVIDIA Nemotron and Nebius Token Factory are used](#how-nvidia-nemotron-and-nebius-token-factory-are-used) · [Feedback on Nebius Token Factory and NVIDIA Nemotron](#feedback-on-nebius-token-factory-and-nvidia-nemotron) · [Quick start](#quick-start) · [Reproduce the experiment](#reproduce-the-experiment) · [Tasks](#tasks) · [Architecture and safety](#architecture-and-safety) · [Project structure](#project-structure) · [Demo video](#demo-video) · [Limitations](#limitations) · [Real-world applications](#real-world-applications) · [Possible improvements](#possible-improvements) · [Future work](#future-work) · [Credits and license](#credits-and-license) · [Bibliography](#bibliography)
+
 ## Why
+
+<p align="center"><img src="docs/readme/01-why.gif" alt="Three cards: always the largest model, always the smallest, and deterministic checks" width="100%"><br><sub>Fig. 1 — Illustrative: the choice described in this section.</sub></p>
 
 Teams wiring an LLM agent into a real workflow face the same question again and again: **which model is good enough for this job?** If you always pick the largest model, you pay for capability you rarely need and wait longer for every answer. If you always pick the smallest, you ship silent failures: a CSV with a lost row, a citation that does not exist, or a pricing rule that breaks at the boundary.
 
 A fluent answer does not show which of the two happened. BenchClaw Studio does.
 
+## Background
+
+<p align="center"><img src="docs/readme/02-background.gif" alt="Animated timeline from the BenchClaw and EnigmAgent baselines to the experiments of 28 October 2026" width="100%"><br><sub>Fig. 2 — Dates recorded in the repository. The Devpost receipt is a submission receipt, not a judging result.</sub></p>
+
+Evaluating an agent means checking what it did, not how fluent it sounds. Software-engineering benchmarks such as
+SWE-bench grade a model's patch by running tests [[1](#ref-1)], and AgentBench and τ-bench evaluate language models as
+agents in interactive settings, τ-bench also over repeated trials [[2](#ref-2), [3](#ref-3)]. Using another LLM as the judge is
+the alternative, but LLM judges show documented biases [[4](#ref-4)]. BenchClaw Studio takes the first route: each of
+its three tasks has deterministic acceptance checks that are fixed before the run.
+
+Cost is the second axis. Cascades and routers send a query to a cheaper model first and escalate or route only when
+needed [[5](#ref-5), [6](#ref-6)], and agent evaluations that report accuracy alone can hide large cost differences [[7](#ref-7)].
+The auto-tier ladder here is such a cascade with the deterministic checks as the escalation signal; its speculative
+variant borrows the idea of speculative decoding, starting cheaper work in parallel [[8](#ref-8)], at the level of whole
+runs. The experiments measure it, and the Results section says where the cost advantage did not hold.
+
+NVIDIA describes Nemotron 3 Super and Ultra in a technical report [[9](#ref-9)]; the tiers used here are those two and
+Nemotron 3.5 Lightning, served through the OpenAI-compatible API of Nebius Token Factory
+[[10](#ref-10)]. Reasoning models spend inference-time compute [[11](#ref-11)]; in the Token Factory API that compute counts against the
+output budget, which is what E01 exposed. One task plants an instruction in a source document, so its checks also probe indirect prompt
+injection [[12](#ref-12), [13](#ref-13)]. Hypotheses, decision rules and stopping rules were committed before each experiment, in the
+spirit of preregistration [[14](#ref-14)].
+
+**Prior public work of the author.** BenchClaw [[15](#ref-15)] (a CLI, dashboard and adapters that call remote evaluation
+services) and EnigmAgent [[16](#ref-16)] (an encrypted vault with a bounded operation broker) were public before this
+project. Studio reuses three EnigmAgent v3 files byte for byte and adapts one HTTP request function from BenchClaw's
+CLI; the Nebius client, task library, agent runner and experiments were created in the contest window. Details and hashes are in
+[`docs/PROVENANCE.md`](docs/PROVENANCE.md).
+
 ## What it does
+
+<p align="center"><img src="docs/readme/03-what-it-does.gif" alt="Task, agent on Nemotron, deterministic checks, escalation on failure, evidence on pass" width="100%"><br><sub>Fig. 3 — The run loop. A failed check escalates to the next tier; a pass ends the run with evidence.</sub></p>
 
 1. **Defines success before the run.** Each task has versioned inputs and deterministic acceptance checks: exact quotes against source lines, integer-cent arithmetic, and held-out boundary cases.
 2. **Runs a real agent on NVIDIA Nemotron.** The model chooses every action (read, write, check, finish). The runtime enforces tool permissions on every action, so a planted prompt injection cannot widen them.
@@ -89,6 +124,8 @@ A fluent answer does not show which of the two happened. BenchClaw Studio does.
 
 ## How NVIDIA Nemotron and Nebius Token Factory are used
 
+<p align="center"><img src="docs/readme/04-nemotron-token-factory.gif" alt="Module map: runner, ladder, tiers, token ledger, provider client and Nebius Token Factory" width="100%"><br><sub>Fig. 4 — Where each module sits. Tokens are reserved before a call and reconciled with the reported usage.</sub></p>
+
 | Where | What runs | Why it matters |
 | --- | --- | --- |
 | `server/nebius.mjs` | OpenAI-compatible `POST /v1/chat/completions` on `api.tokenfactory.nebius.com`, JSON-object mode, provider seed, 8,192-token output budget for reasoning tiers | Every agent turn is a real Token Factory call; nothing is simulated or cached |
@@ -100,6 +137,8 @@ A fluent answer does not show which of the two happened. BenchClaw Studio does.
 Token Factory accelerated this project in two ways. First, all three Nemotron tiers sit behind one endpoint and one key, so the comparison needed no infrastructure. Second, it reports usage per call, so cost per task comes straight from provider receipts.
 
 ## Feedback on Nebius Token Factory and NVIDIA Nemotron
+
+<p align="center"><img src="docs/readme/05-throughput-feedback.gif" alt="Dumbbell chart of served tokens per second for three tiers, E02 against E03" width="100%"><br><sub>Fig. 5 — Throughput changed within a day. Data: the Feedback text below and experiments/LOG.md.</sub></p>
 
 What worked well:
 - **One endpoint and one key for every Nemotron tier.** Because Token Factory is OpenAI-compatible, the ladder is a single `model` field. No extra infrastructure was needed to compare 30B, 120B and 550B models.
@@ -116,6 +155,8 @@ What would help builders:
 - **Empty content with `finish_reason=stop`.** It happened once, when the model returned only reasoning. A distinct finish reason would make this case explicit.
 
 ## Quick start
+
+<p align="center"><img src="docs/readme/06-quick-start.gif" alt="Terminal running npm test: 54 tests pass" width="100%"><br><sub>Fig. 6 — A real local run of the offline test suite on a copy of the published source.</sub></p>
 
 Requires Node.js 22+. No build step and one pinned runtime dependency.
 
@@ -144,6 +185,8 @@ STUDIO_MAX_RUNS=30
 
 ## Reproduce the experiment
 
+<p align="center"><img src="docs/readme/07-reproduce.gif" alt="Four-step pipeline and bars with the number of runs per experiment, 182 in total" width="100%"><br><sub>Fig. 7 — The reproduction path and the runs behind the Results. Data: experiments/LOG.md.</sub></p>
+
 ```sh
 NEBIUS_API_KEY=... node scripts/bench-tiers.mjs --out experiments/E01 --max-tokens 2048   # E01
 NEBIUS_API_KEY=... node scripts/bench-tiers.mjs --out experiments/E02 --max-tokens 8192   # E02 (product default)
@@ -161,6 +204,8 @@ Each experiment's hypotheses, decision rules and stopping rule were written in [
 
 ## Tasks
 
+<p align="center"><img src="docs/readme/08-tasks.gif" alt="Three task cards with their output files and deterministic checks" width="100%"><br><sub>Fig. 8 — The three tasks and what their checks verify.</sub></p>
+
 | Task | Agent output | Deterministic checks |
 | --- | --- | --- |
 | **A release answer you can trace**: document research with a planted injection | `brief.json` | Required approvals and rollback steps covered; every quote matches an approved document line exactly; no citation to the injected file; inputs unchanged |
@@ -169,12 +214,16 @@ Each experiment's hypotheses, decision rules and stopping rule were written in [
 
 ## Architecture and safety
 
+<p align="center"><img src="docs/readme/09-architecture-safety.gif" alt="Four cards: bounded runner, EnigmAgent vault and broker, HTTP hardening, evidence" width="100%"><br><sub>Fig. 9 — The four safeguards described below.</sub></p>
+
 - **Bounded runner** (`server/engine.mjs`): 12 turns, 180 s, 32 KiB output, a per-run virtual file map, and tool permissions checked on every action. Documents are tagged as untrusted data.
 - **EnigmAgent vault and broker** (`vendor/enigmagent`, MIT): the Nebius key and a synthetic service credential sit in an encrypted in-memory vault. Raw secret resolution is never a model-visible tool, and the protected `service_health` call returns its status only.
 - **HTTP hardening** (`server/index.mjs`): Host and Origin allowlists, strict CSP, HttpOnly SameSite cookies, request and response size limits, two concurrent runs and per-session caps in public mode.
 - **Evidence** (`scripts/verify-report.mjs`): exported reports carry the artifact, inputs, checks, provider receipts and source hashes. The checks can be recomputed without inference.
 
 ## Project structure
+
+<p align="center"><img src="docs/readme/10-project-structure.gif" alt="Folder map with arrows showing which folder writes or serves which" width="100%"><br><sub>Fig. 10 — Schematic of the directory layout.</sub></p>
 
 ```
 server/      runner, ladder, Nemotron tiers, Token Factory client, token ledger, HTTP API
@@ -195,6 +244,8 @@ tests/       node:test suite (offline, scripted providers only)
 
 These are the boundaries of the current version, documented as they would be in any engineering report:
 
+<p align="center"><img src="docs/readme/11-limitations.gif" alt="Mean time per task for the ladder and always Ultra, and the ladder's cost change in three experiments" width="100%"><br><sub>Fig. 11 — Data: the Results table and experiments/LOG.md.</sub></p>
+
 - Three fixture tasks are evidence about **those tasks**. They are not a general ranking of the models, and with 18 cells per tier the seed-to-seed spread is wide (see ± SD).
 - The ladder raises the pass rate, but it is slower than always-Ultra, and its cost advantage depends on the run: from −34% to +32% across our experiments. A task that escalates pays for every tier it tries.
 - Provider throughput changes within a day (Lightning 264 → 78 tokens/s on 2026-10-28), so latency figures hold for the time they were measured.
@@ -203,8 +254,86 @@ These are the boundaries of the current version, documented as they would be in 
 - Cost is computed from reported tokens × published price. It is an estimate, not an invoice.
 - The replay demo is read-only. Live runs need a Token Factory key, either locally or through the Render blueprint.
 
+## Real-world applications
+
+<p align="center"><img src="docs/readme/12-applications.gif" alt="Six application cards appearing one after another" width="100%"><br><sub>Fig. 12 — Potential uses that follow from the measured design; none is a deployed application.</sub></p>
+
+The method is not tied to the three fixture tasks. Applications that could follow, each needing the user's own tasks
+and checks first:
+
+- **Choosing a tier per workflow.** Before wiring an agent into a job, run that job's tasks and checks on each
+  Nemotron tier and compare pass rate, time and cost together, as cost-aware agent evaluation argues [[7](#ref-7)].
+- **Setting a latency policy.** Use the ladder when pass rate matters most and start at Ultra for latency-critical
+  work; the Results show both with their measured costs.
+- **Re-testing after provider changes.** Repeat the grid when a model, a price or the served throughput changes,
+  because the latency figures hold only for the time they were measured.
+- **Probing prompt-injection exposure.** A planted instruction in a source document is checked for being cited, and
+  tool permissions are enforced so it cannot widen them, in the spirit of agent security benchmarks [[12](#ref-12), [13](#ref-13)].
+- **Audit evidence.** Exported reports carry source hashes and provider receipts, so a reviewer can recompute the
+  checks offline without running inference.
+- **A template for honest benchmarks.** Pre-registered hypotheses, failures kept and corrections logged can be
+  reused for other agent tasks.
+
+## Possible improvements
+
+<p align="center"><img src="docs/readme/13-improvements.gif" alt="Four stated limitations on the left turning into proposed next experiments on the right" width="100%"><br><sub>Fig. 13 — Each improvement targets a limitation stated in this README.</sub></p>
+
+- **More tasks and seeds.** Three fixture tasks and 18 cells per tier leave a wide seed-to-seed spread. Larger and
+  more varied task sets, with repeated trials as in τ-bench [[3](#ref-3)], would narrow it. The next grid should be
+  pre-registered [[14](#ref-14)].
+- **Test tier memory.** In E04 it matched the ladder's 94.4% with a mean time of 34.2 s and $0.0050 per task, and
+  was rejected only on the 30 s target. It is the next policy to test, with its target fixed in advance.
+- **Separate provider load from policy.** Throughput changed within a day (Lightning 264 to 78 tokens/s), so
+  repeating grids at different hours would show how much of the latency depends on the time of measurement.
+- **Account for every call.** A call cut by the run limit returns no usage and the ledger fails closed. A provider
+  usage lookup by request ID, as requested in the feedback above, would let the cost of such runs be reported exactly
+  instead of as low–high bounds.
+- **Measure sampling variety.** At temperature 0 the seeds only measure provider-side nondeterminism [[17](#ref-17)]. A
+  separate experiment with sampling would measure variety.
+- **Check cost against billing.** Cost is computed from reported tokens and published prices; comparing it with an
+  invoice would test that estimate.
+
+## Future work
+
+<p align="center"><img src="docs/readme/14-roadmap.gif" alt="Roadmap with three completed milestones and three proposed steps" width="100%"><br><sub>Fig. 14 — Completed milestones are documented in this repository; the rest are proposed next steps; none is claimed as started.</sub></p>
+
+Proposed next steps, in order; none is claimed as started:
+
+1. Pre-register and run the tier-memory test that the Results name as the next one to run.
+2. Extend the task set and the number of seeds, and report the spread again.
+3. Repeat the grids at different times of day and report throughput per call as a covariate.
+4. Add a sampling experiment to measure variety beyond temperature 0.
+5. Compare the computed costs with the provider's billing data.
+
 ## Credits and license
 
 MIT © 2026 Francisco Angulo de Lafuente ([@Agnuxo1](https://github.com/Agnuxo1)). Built for the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents track).
 
 The models are NVIDIA Nemotron under the NVIDIA Open Model License, served remotely by Nebius Token Factory; no weights are redistributed. Upstream components from [BenchClaw](https://github.com/Agnuxo1/benchclaw) and [EnigmAgent](https://github.com/Agnuxo1/EnigmAgent) keep their MIT notices (see [docs/PROVENANCE.md](docs/PROVENANCE.md)). Fonts are system fonts; there are no third-party images, logos or music.
+
+## Bibliography
+
+1. <a id="ref-1"></a>Jimenez, C. E., Yang, J., Wettig, A., et al. (2023). SWE-bench: Can Language Models Resolve Real-World GitHub Issues?. *arXiv* 2310.06770. https://arxiv.org/abs/2310.06770
+2. <a id="ref-2"></a>Liu, X., Yu, H., Zhang, H., et al. (2023). AgentBench: Evaluating LLMs as Agents. *arXiv* 2308.03688. https://arxiv.org/abs/2308.03688
+3. <a id="ref-3"></a>Yao, S., Shinn, N., Razavi, P., & Narasimhan, K. (2024). τ-bench: A benchmark for tool-agent-user interaction in real-world domains. *arXiv* 2406.12045. https://arxiv.org/abs/2406.12045
+4. <a id="ref-4"></a>Zheng, L., Chiang, W., Sheng, Y., et al. (2023). Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena. *arXiv* 2306.05685. https://arxiv.org/abs/2306.05685
+5. <a id="ref-5"></a>Chen, L., Zaharia, M., & Zou, J. (2023). FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance. *arXiv* 2305.05176. https://arxiv.org/abs/2305.05176
+6. <a id="ref-6"></a>Ong, I., Almahairi, A., Wu, V., et al. (2024). RouteLLM: Learning to Route LLMs with Preference Data. *arXiv* 2406.18665. https://arxiv.org/abs/2406.18665
+7. <a id="ref-7"></a>Kapoor, S., Stroebl, B., Siegel, Z. S., Nadgir, N., & Narayanan, A. (2024). AI Agents That Matter. *arXiv* 2407.01502. https://arxiv.org/abs/2407.01502
+8. <a id="ref-8"></a>Leviathan, Y., Kalman, M., & Matias, Y. (2022). Fast Inference from Transformers via Speculative Decoding. *arXiv* 2211.17192. https://arxiv.org/abs/2211.17192
+9. <a id="ref-9"></a>NVIDIA, Blakeman, A., et al. (2025). NVIDIA Nemotron 3: Efficient and open intelligence. *arXiv* 2512.20856. https://arxiv.org/abs/2512.20856
+10. <a id="ref-10"></a>Nebius (2026). *Nebius Token Factory documentation*. https://docs.tokenfactory.nebius.com/
+11. <a id="ref-11"></a>Snell, C., Lee, J., Xu, K., & Kumar, A. (2024). Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters. *arXiv* 2408.03314. https://arxiv.org/abs/2408.03314
+12. <a id="ref-12"></a>Greshake, K., Abdelnabi, S., Mishra, S., et al. (2023). Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection. *arXiv* 2302.12173. https://arxiv.org/abs/2302.12173
+13. <a id="ref-13"></a>Debenedetti, E., Zhang, J., Balunović, M., et al. (2024). AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents. *arXiv* 2406.13352. https://arxiv.org/abs/2406.13352
+14. <a id="ref-14"></a>Nosek, B. A., Ebersole, C. R., DeHaven, A. C., & Mellor, D. T. (2018). The preregistration revolution. *Proceedings of the National Academy of Sciences*, 115(11), 2600–2606. https://doi.org/10.1073/pnas.1708274114
+15. <a id="ref-15"></a>Angulo de Lafuente, F. (2026). *BenchClaw* [Software repository, MIT licence]. GitHub. https://github.com/Agnuxo1/benchclaw
+16. <a id="ref-16"></a>Angulo de Lafuente, F. (2026). *EnigmAgent* [Software repository, MIT licence]. GitHub. https://github.com/Agnuxo1/EnigmAgent
+17. <a id="ref-17"></a>Atil, B., Aykent, S., Chittams, A., et al. (2024). Non-Determinism of "Deterministic" LLM Settings. *arXiv* 2408.04667. https://arxiv.org/abs/2408.04667
+
+---
+
+<div align="center">
+<sub>Built by <a href="https://github.com/Agnuxo1">Francisco Angulo de Lafuente</a> · each added figure names its
+data source in its footer, and schematic figures say so · <a href="#benchclaw-studio">back to top ↑</a></sub>
+</div>
