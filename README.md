@@ -22,6 +22,10 @@ Run real agent tasks on NVIDIA Nemotron through **Nebius Token Factory**, let de
 
 **Contents** — [Why](#why) · [Background](#background) · [What it does](#what-it-does) · [Results](#results) · [How NVIDIA Nemotron and Nebius Token Factory are used](#how-nvidia-nemotron-and-nebius-token-factory-are-used) · [Feedback on Nebius Token Factory and NVIDIA Nemotron](#feedback-on-nebius-token-factory-and-nvidia-nemotron) · [Quick start](#quick-start) · [Reproduce the experiment](#reproduce-the-experiment) · [Tasks](#tasks) · [Architecture and safety](#architecture-and-safety) · [Project structure](#project-structure) · [Demo video](#demo-video) · [Limitations](#limitations) · [Real-world applications](#real-world-applications) · [Possible improvements](#possible-improvements) · [Future work](#future-work) · [Credits and license](#credits-and-license) · [Bibliography](#bibliography)
 
+<!-- impact-note:start -->
+<sub><strong>Efficiency and practical value.</strong> Deterministic acceptance checks connect model selection to successful task outputs, while per-call accounting and bounded runs make spending visible and controllable. Exported evidence can be rechecked offline without another inference run. The <a href="#results">recorded experiments</a> help teams choose between success rate, latency and cost: escalation improved fixture-task pass rates, but its cost advantage varied, so smaller-first routing is not presented as guaranteed savings.</sub>
+<!-- impact-note:end -->
+
 ## Why
 
 <p align="center"><img src="docs/readme/01-why.gif" alt="Three cards: always the largest model, always the smallest, and deterministic checks" width="100%"><br><sub>Fig. 1 — Illustrative: the choice described in this section.</sub></p>
